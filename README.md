@@ -2,6 +2,8 @@
 
 Kliensoldali (Serverless), tisztán böngészőben futó tudományos szakirodalom-kutató és bibliográfiai elemző platform a **Magyar Tudományos Művek Tára (MTMT v2)** és az **OpenAlex** globális tudományos gráfjához.
 
+[English documentation (README.en.md)](README.en.md) • [English Developer Guide (DEVELOPER_GUIDE.md)](DEVELOPER_GUIDE.md)
+
 ---
 
 ## 🌟 Főbb Képességek és Funkciók

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Guide - MTMT Literature Search & Network Analysis Engine</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background: #f4f7f6;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .kontener {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .fejlec {
+      background-color: #004481;
+      color: white;
+      padding: 20px;
+      border-radius: 5px 5px 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .fejlec h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .vissza-gomb {
+      background-color: #17a2b8;
+      color: white;
+      padding: 8px 15px;
+      text-decoration: none;
+      border-radius: 3px;
+      font-weight: bold;
+      font-size: 14px;
+      transition: background-color 0.2s;
+    }
+
+    .vissza-gomb:hover {
+      background-color: #138496;
+    }
+
+    .kartya {
+      background: #fff;
+      padding: 30px;
+      border-radius: 0 0 5px 5px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    h2 {
+      color: #004481;
+      border-bottom: 2px solid #004481;
+      padding-bottom: 8px;
+      margin-top: 30px;
+    }
+
+    h3 {
+      color: #333;
+      margin-top: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f8f9fa;
+      color: #004481;
+    }
+
+    code {
+      background-color: #e9ecef;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: monospace;
+      color: #c7254e;
+    }
+
+    .tipp-doboz {
+      background-color: #e8f4f8;
+      border-left: 4px solid #17a2b8;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 0 4px 4px 0;
+    }
+
+    .figyelmeztetes-doboz {
+      background-color: #fff3cd;
+      border-left: 4px solid #ffc107;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 0 4px 4px 0;
+    }
+
+    .halozat-doboz {
+      background-color: #fdf3f8;
+      border-left: 4px solid #e83e8c;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 0 4px 4px 0;
+    }
+
+    .token-minta {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #004481;
+      color: #fff;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="kontener">
+    <div class="fejlec">
+      <h1>User Guide & Search Manual</h1>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <a href="sugo.html" style="color: #cce0ff; text-decoration: none; font-size: 13px; font-weight: bold; padding: 6px 12px; border: 1px solid rgba(255,255,255,0.4); border-radius: 4px;">🇭🇺 Magyar változat</a>
+        <a href="index.html" class="vissza-gomb">← Back to Search</a>
+      </div>
+    </div>
+
+    <div class="kartya">
+      <p>Welcome to the <strong>MTMT Literature Search & Network Analysis Engine</strong>! This guide explains how to construct basic and systematic queries, utilize interactive filter tokens, leverage OpenAlex network exploration, and export formatted references.</p>
+
+      <h2>1. Elevated Search Bar & Interactive Tokens</h2>
+      <p>When selecting filters in the left sidebar (Author, Journal, Institution, Publication Year, or Publication Role), they are immediately projected into the main search box as visual interactive chips:</p>
+      <ul>
+        <li><span class="token-minta">AUTHOR: John Doe ✕</span>: Represents an active entity pre-filter.</li>
+        <li><strong>Visual AND Badge:</strong> Clearly indicates that your free-text keywords must co-occur alongside the selected entity filters.</li>
+        <li><strong>One-Click Removal:</strong> Clicking the <span style="color:#d9534f; font-weight:bold;">✕</span> button immediately removes the token and clears the corresponding sidebar selection.</li>
+      </ul>
+
+      <h2>2. Search Modes</h2>
+
+      <h3>A. Simple Search Mode</h3>
+      <p>Designed for fast, Google-like querying using plain language and operators:</p>
+      <table>
+        <tr>
+          <th>Operator / Syntax</th>
+          <th>Example</th>
+          <th>Description</th>
+        </tr>
+        <tr>
+          <td>Space (Implicit AND)</td>
+          <td><code>climate change adaptation</code></td>
+          <td>Finds publications containing all three keywords.</td>
+        </tr>
+        <tr>
+          <td>Exact Phrase (Quotes)</td>
+          <td><code>"systematic review"</code></td>
+          <td>Matches the exact, contiguous phrase in titles or abstracts.</td>
+        </tr>
+        <tr>
+          <td>Exclusion (Minus Sign)</td>
+          <td><code>artificial intelligence -health</code></td>
+          <td>Finds publications about AI, but strictly excludes articles containing "health".</td>
+        </tr>
+        <tr>
+          <td>Wildcard Asterisk (<code>*</code>)</td>
+          <td><code>sustainab*</code></td>
+          <td>Matches sustainability, sustainable, sustainably, etc.</td>
+        </tr>
+      </table>
+
+      <h3>B. Systematic Literature Review (SLR) Mode</h3>
+      <p>Structured according to the <strong>PRISMA protocol</strong> for rigorous academic synthesis:</p>
+      <ul>
+        <li><strong>Within a Row (Synonyms):</strong> Terms separated by commas or OR operators represent alternative synonyms (e.g. <code>AI, artificial intelligence, machine learning</code>).</li>
+        <li><strong>Between Rows (Dimensions):</strong> Each additional row represents a mandatory concept dimension joined by Boolean <strong>AND</strong> (e.g. Row 1: Concept, Row 2: Method, Row 3: Target population).</li>
+        <li><strong>Cartesian Product Solver:</strong> The client engine evaluates combinations and fetches all branches concurrently without exceeding API query limits.</li>
+      </ul>
+
+      <h2>3. Bibliometric Network Discovery (OpenAlex Integration)</h2>
+      <div class="halozat-doboz">
+        <h3>Graph-Based Literature Discovery</h3>
+        <p>This module traverses the global scientific knowledge graph to discover works connected to your MTMT results:</p>
+        <ul>
+          <li><strong>Bibliographic Coupling (Related Works):</strong> Finds related international papers sharing key references in their bibliographies.</li>
+          <li><strong>Co-Citation Analysis:</strong> Identifies foundational papers frequently cited alongside the target papers by third-party research literature.</li>
+          <li><strong>Network Drawer & Fusion:</strong> OpenAlex works appear in the bottom drawer. Clicking <code>+ Add to Results</code> converts their metadata into the MTMT format, allowing you to cite them together seamlessly.</li>
+        </ul>
+      </div>
+
+      <h2>4. Academic Citation & Export Engine</h2>
+      <p>Once you have selected candidate publications, use the top-right export buttons:</p>
+      <table>
+        <tr>
+          <th>Format</th>
+          <th>Usage & Target System</th>
+        </tr>
+        <tr>
+          <td><strong>Formatted HTML</strong></td>
+          <td>Instant bibliography formatted in <strong>APA (7th)</strong>, <strong>IEEE</strong>, <strong>MLA</strong>, or <strong>Chicago</strong> styles for direct copy-pasting.</td>
+        </tr>
+        <tr>
+          <td><strong>BibTeX (.bib)</strong></td>
+          <td>LaTeX-compatible citations with automatic double curly brace <code>{{Case Protection}}</code> on titles.</td>
+        </tr>
+        <tr>
+          <td><strong>RIS (.ris)</strong></td>
+          <td>Compatible with <strong>Zotero</strong>, <strong>Mendeley</strong>, and <strong>EndNote</strong> (features automatic <code>internalId</code> injection for papers missing standard page numbers).</td>
+        </tr>
+        <tr>
+          <td><strong>CSL-JSON</strong></td>
+          <td>Citation Style Language JSON format for computational bibliographic pipelines.</td>
+        </tr>
+      </table>
+
+      <h2>5. Session Management & Novelty Alerting</h2>
+      <div class="tipp-doboz">
+        <p><strong>Save / Load Search:</strong> Save your entire workflow (keywords, filters, active tokens, SLR matrices) as a lightweight <code>.json</code> file on your computer.</p>
+        <p><strong>Alerting / Novelty Check:</strong> When reopening a saved search months later, activate the "Only show new records since last save" toggle to review only newly added literature!</p>
+      </div>
+
+      <div style="text-align: center; margin-top: 30px;">
+        <a href="index.html" class="vissza-gomb" style="padding: 10px 25px; font-size: 16px;">Launch Literature Search</a>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
