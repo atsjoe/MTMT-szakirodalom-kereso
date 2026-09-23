@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saját Szótár Kezelése - MTMT Kereső</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+}
+        .kontener {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,
+    0,
+    0,
+    0.1);
+}
+        h1 {
+            color: #004481;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-top: 0;
+}
+        code {
+            background-color: #f8f9fa;
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: #d9534f;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            border: 1px solid #ddd;
+            display: inline-block;
+            margin: 10px 0;
+}
+        .gomb-sor {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+}
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: opacity 0.2s;
+}
+        button:hover { opacity: 0.9;
+}
+        .gomb-elsodleges { background-color: #28a745; color: white;
+}
+        .gomb-masodlagos { background-color: #004481; color: white;
+}
+        .gomb-torles { background-color: #d9534f; color: white; margin-left: auto;
+}
+        textarea {
+            width: 100%;
+            padding: 15px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            background-color: #fafafa;
+            resize: vertical;
+}
+        .info-doboz {
+            background-color: #e9f7fe;
+            border-left: 4px solid #004481;
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            font-size: 13px;
+}
+    </style>
+</head>
+<body>
+
+    <div class="kontener">
+        <h1>Saját Szótár (Tezaurusz) Kezelése</h1>
+        
+        <div class="info-doboz">
+            A szótárat egyszerű szövegként (<strong>.txt</strong> fájlként) kezelheti. Egy sorba egy fogalmat és annak szinonimáit írja, egyenlőségjellel elválasztva. 
+            <br>Példa formátum: <code>mesterséges intelligencia = ai, artificial intelligence, gépi tanulás</code>
+        </div>
+
+        <div class="gomb-sor">
+            <button onclick="mentesBongeszobe()" class="gomb-elsodleges">💾 Mentés és Alkalmazás</button>
+            <button onclick="exportalasTxt()" class="gomb-masodlagos">⬇️ Letöltés (.txt)</button>
+            <button onclick="document.getElementById('file-import').click()" class="gomb-masodlagos">⬆️ Betöltés (.txt)</button>
+            <button onclick="szotarTorlese()" class="gomb-torles">🗑️ Szótár ürítése</button>
+            <input type="file" id="file-import" accept=".txt" style="display: none;" onchange="importalasTxt(event)">
+        </div>
+
+        <textarea id="szotar-textarea" rows="20" placeholder="Ide írja vagy másolja be a szótárát...&#10;&#10;Például:&#10;oktatás = education, pedagógia, tanítás&#10;könyvtár = library, archívum, könyvtártudomány"></textarea>
+    </div>
+
+    <script src="alapszotar.js"></script>
+
+    <script>
+        // Oldal betöltésekor beolvassuk a böngésző memóriájából a meglévő szótárat
+        window.onload = function() {
+            const mentett = localStorage.getItem('mtmtSajatSzotar');
+            if (mentett) {
+                document.getElementById('szotar-textarea').value = mentett;
+    }
+};
+
+        // 1. Mentés a böngészőbe (ezt használja az index.html)
+        function mentesBongeszobe() {
+            const szoveg = document.getElementById('szotar-textarea').value;
+            localStorage.setItem('mtmtSajatSzotar', szoveg);
+            alert("A szótár sikeresen elmentve! Most már visszatérhet a keresőbe (index.html).");
+}
+// 2. Exportálás egyszerű .txt fájlba a számítógépre
+        function exportalasTxt() {
+            const szoveg = document.getElementById('szotar-textarea').value;
+            if (!szoveg.trim()) {
+                alert("A szótár üres, nincs mit letölteni!");
+                return;
+    }
+            const blob = new Blob([szoveg
+    ],
+    { type: 'text/plain;charset=utf-8'
+    });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'sajat_mtmt_szotar.txt';
+            link.click();
+}
+// 3. Importálás .txt fájlból
+        function importalasTxt(event) {
+            const file = event.target.files[
+        0
+    ];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('szotar-textarea').value = e.target.result;
+                mentesBongeszobe(); // Automatikusan el is mentjük a böngészőbe
+    };
+            reader.readAsText(file);
+            event.target.value = ''; // Mező nullázása az újbóli betöltéshez
+}
+// 4. Törlés
+        function szotarTorlese() {
+            if (confirm("Biztosan törli a teljes szótárat? Ezt nem lehet visszavonni!")) {
+                document.getElementById('szotar-textarea').value = '';
+                localStorage.removeItem('mtmtSajatSzotar');
+    }
+}
+    </script>
+</body>
+</html>

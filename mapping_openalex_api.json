@@ -1,0 +1,14 @@
+{
+  "entity": "Work",
+  "source": "OpenAlex REST API (https://api.openalex.org/works)",
+  "fields": {
+    "id": "OpenAlex globális kanonikus URL azonosító (utolsó rész: W...)",
+    "doi": "Kanonikus DOI URL (https://doi.org/...)",
+    "title": "A publikáció angol vagy eredeti címe",
+    "publication_year": "Kiadás éve (YYYY)",
+    "authorships": "Szerzői adatok (display_name, orcid, institutions)",
+    "related_works": "Bibliográfiai csatoláshoz használt kapcsolódó művek ID listája",
+    "cited_by_api_url": "Az idéző cikkek lekéréséhez használt végpont",
+    "primary_location": "Forrás folyóirat vagy kiadó adatai (display_name, issn_l)"
+  }
+}

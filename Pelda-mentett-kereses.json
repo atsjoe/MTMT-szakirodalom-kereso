@@ -1,0 +1,114 @@
+{
+  "datum": "2026-03-29T18:25:02.836Z",
+  "keresoMod": "osszetett",
+  "keresoszoveg": "stress brain \"systematic review\"",
+  "nlpSzoveg": "",
+  "osszetettBlokkok": [
+    [
+      {
+        "szo": "post-traumatic stress disorder",
+        "mezo": "label"
+      },
+      {
+        "szo": "post traumatic stress disorder",
+        "mezo": "label"
+      },
+      {
+        "szo": "posttraumatic stress disorder",
+        "mezo": "label"
+      },
+      {
+        "szo": "ptsd",
+        "mezo": "label"
+      }
+    ],
+    [
+      {
+        "szo": "traumatic brain injur*",
+        "mezo": "label"
+      },
+      {
+        "szo": "tbi",
+        "mezo": "label"
+      },
+      {
+        "szo": "mtbi",
+        "mezo": "label"
+      }
+    ],
+    [
+      {
+        "szo": "biomarker*",
+        "mezo": "label"
+      },
+      {
+        "szo": "biological",
+        "mezo": "label"
+      },
+      {
+        "szo": "physiological",
+        "mezo": "label"
+      },
+      {
+        "szo": "immun*",
+        "mezo": "label"
+      },
+      {
+        "szo": "genetic",
+        "mezo": "label"
+      },
+      {
+        "szo": "blood",
+        "mezo": "label"
+      },
+      {
+        "szo": "serum",
+        "mezo": "label"
+      },
+      {
+        "szo": "molecular",
+        "mezo": "label"
+      },
+      {
+        "szo": "inflamm*",
+        "mezo": "label"
+      },
+      {
+        "szo": "histology",
+        "mezo": "label"
+      },
+      {
+        "szo": "neuroimaging",
+        "mezo": "label"
+      },
+      {
+        "szo": "neurophysiological",
+        "mezo": "label"
+      },
+      {
+        "szo": "neuroanatomical",
+        "mezo": "label"
+      }
+    ]
+  ],
+  "osszetettKizarva": "",
+  "eloszuroEvTol": "",
+  "eloszuroEvIg": "",
+  "eloszuroAuthor": "",
+  "eloszuroJournal": "",
+  "eloszuroInstitute": "",
+  "szurok": {
+    "evek": [],
+    "evMod": "tartalmaz",
+    "allapotok": [],
+    "allapotMod": "tartalmaz",
+    "jellegek": [],
+    "jellegMod": "tartalmaz",
+    "tipusok": [],
+    "tipusMod": "tartalmaz",
+    "besorolasok": [],
+    "besorolasMod": "tartalmaz",
+    "nyelvek": [],
+    "nyelvMod": "tartalmaz"
+  }
+}

@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="hu">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Súgó - MTMT Szakirodalom Kereső</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background: #f4f7f6;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .kontener {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .fejlec {
+      background-color: #004481;
+      color: white;
+      padding: 20px;
+      border-radius: 5px 5px 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .fejlec h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .vissza-gomb {
+      background-color: #17a2b8;
+      color: white;
+      padding: 8px 15px;
+      text-decoration: none;
+      border-radius: 3px;
+      font-weight: bold;
+      font-size: 14px;
+      transition: background-color 0.2s;
+    }
+
+    .vissza-gomb:hover {
+      background-color: #138496;
+    }
+
+    .kartya {
+      background: #fff;
+      padding: 30px;
+      border-radius: 0 0 5px 5px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    h2 {
+      color: #004481;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 5px;
+      margin-top: 35px;
+    }
+
+    h3 {
+      color: #d9534f;
+      margin-top: 25px;
+      font-size: 18px;
+    }
+
+    h4 {
+      color: #333;
+      margin-bottom: 5px;
+    }
+
+    code {
+      background-color: #f8f9fa;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #d9534f;
+      font-family: 'Courier New', Courier, monospace;
+      font-weight: bold;
+      border: 1px solid #ddd;
+    }
+
+    ul {
+      padding-left: 20px;
+    }
+
+    li {
+      margin-bottom: 8px;
+    }
+
+    .tipp {
+      background-color: #e9f7fe;
+      color: #004481;
+      padding: 15px;
+      border-left: 5px solid #17a2b8;
+      margin: 20px 0;
+      font-size: 14px;
+      border-radius: 0 4px 4px 0;
+    }
+
+    .figyelem {
+      background-color: #fff3cd;
+      color: #856404;
+      padding: 15px;
+      border-left: 5px solid #ffc107;
+      margin: 20px 0;
+      font-size: 14px;
+      border-radius: 0 4px 4px 0;
+    }
+
+    .kritikus {
+      background-color: #f8d7da;
+      color: #721c24;
+      padding: 15px;
+      border-left: 5px solid #dc3545;
+      margin: 20px 0;
+      font-size: 14px;
+      border-radius: 0 4px 4px 0;
+    }
+
+    .pelda-doboz {
+      background-color: #f8f9fa;
+      border: 1px solid #ddd;
+      padding: 15px;
+      border-radius: 4px;
+      font-size: 13px;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="kontener">
+    <div class="fejlec">
+      <h1>Használati útmutató (Súgó)</h1>
+      <a href="index.html" class="vissza-gomb">⬅ Vissza a keresőhöz</a>
+    </div>
+
+    <div class="kartya">
+      <p>Üdvözöljük az <strong>MTMT Szakirodalom Keresőben</strong>! Ez a rendszer egy böngészőből futtatható, adatbázis
+        nélküli (kliens-oldali) alkalmazás, amely közvetlenül a Magyar Tudományos Művek Tára (MTMT) hivatalos
+        szerveréről kéri le az adatokat, speciálisan kutatók, oktatók és hallgatók igényeire szabva.</p>
+
+      <h2>1. Keresési Módok</h2>
+
+      <h3>1.1. Egyszerű keresés</h3>
+      <p>A leggyorsabb módja a szakirodalom feltérképezésének. A megadott szavakat a rendszer minden metaadatban (cím,
+        absztrakt, szerző, folyóirat) keresi.</p>
+      <ul>
+        <li><strong>ÉS (AND) kapcsolat:</strong> A szavakat válassza el szóközzel. A <code>könyvtár menedzsment</code>
+          keresés csak azokat a cikkeket hozza le, amelyekben mindkét szó szerepel valahol.</li>
+        <li><strong>Pontos kifejezés (Exact phrase):</strong> Ha több szót szigorú sorrendben, egybefüggően keres, tegye
+          őket idézőjelbe! Pl.: <code>"mesterséges intelligencia"</code>.</li>
+        <li><strong>Szigorú szókeresés:</strong> A rendszer alapértelmezetten teljes szavakat keres. Ha beírja, hogy
+          <code>AI</code>, a találatok között nem fog szerepelni a "details" szó, csak az önálló "AI".</li>
+        <li><strong>Csonkolás (Csillag):</strong> Használjon <code>*</code> jelet a szavak végén, ha a ragozott formákra
+          is kíváncsi! Pl. a <code>polic*</code> megtalálja a <em>police</em>, <em>policing</em>, <em>policy</em>
+          szavakat is.</li>
+        <li><strong>Kizárás (Mínusz):</strong> Tegyen <code>-</code> jelet a nem kívánt szó elé (szóköz nélkül). Pl.:
+          <code>oktatás -közoktatás</code>.</li>
+      </ul>
+
+      <h3>1.2. Szisztematikus (SLR) keresés</h3>
+      <p>A PRISMA protokoll szerinti irodalomkutatást (Systematic Literature Review) támogató építőkockás felület. Itt
+        tudja a kutatási kérdését koncepciókra (blokkokra) bontani.</p>
+      <ul>
+        <li><strong>Blokkok (Sorok):</strong> Egy soron belül a szavakat vesszővel válassza el. Ezek között <strong>VAGY
+            (OR)</strong> kapcsolat lesz. Ide a szinonimákat írja.</li>
+        <li><strong>Kapcsolat a blokkok között:</strong> A sorok között szigorú <strong>ÉS (AND)</strong> kapcsolat
+          érvényesül. Csak az a publikáció jelenik meg, amelyik *minden* blokkból tartalmaz legalább egy kifejezést.
+        </li>
+        <li><strong>Mezőválasztó:</strong> Minden sor mellett legördülő menüből kiválaszthatja, hogy az adott
+          szinonima-csoportot hol keresse a rendszer (Minden metaadat, Szerző, Folyóirat, Intézmény).</li>
+        <li><strong>Kizárás:</strong> A panel alján található KIZÁRVA mezőbe írt szavakat tartalmazó cikkek azonnal
+          elrejtésre kerülnek.</li>
+      </ul>
+
+      <div class="pelda-doboz">
+        <strong>Példa egy összetett keresésre: Traumatikus agysérülések és PTSD biomarkereinek szisztematikus
+          áttekintése</strong><br>
+        Ezt a kutatási kérdést három fő koncepcióra (blokkra) bontjuk fel:
+        <ul style="margin-top: 5px; margin-bottom: 0;">
+          <li><strong>1. blokk (PTSD fogalmai):</strong>
+            <code>post-traumatic stress disorder, post traumatic stress disorder, ptsd</code></li>
+          <li><strong>2. blokk (Agysérülés fogalmai):</strong> <code>traumatic brain injur*, tbi, mtbi</code></li>
+          <li><strong>3. blokk (Biomarkerek és módszerek):</strong>
+            <code>biomarker*, biological, physiological, immun*, genetic, blood, serum, molecular, inflamm*, histology, neuroimaging</code>
+          </li>
+        </ul>
+        <em>Eredmény: A rendszer csak azokat a cikkeket hozza le, amik a PTSD-vel ÉS az agysérüléssel ÉS valamilyen
+          biológiai markerrel egyszerre foglalkoznak.</em>
+      </div>
+
+      <h2>2. Saját Tezaurusz (Szótár) és Szinonimák</h2>
+      <p>Mivel minden tudományterület más és más fogalomkészletet használ, a rendszer lehetőséget ad egy saját,
+        testreszabott szótár (tezaurusz) felépítésére. A Szisztematikus keresésnél a <strong>💡 Javaslat</strong> gombra
+        kattintva a rendszer ebből a szótárból automatikusan kitölti a sort a kapcsolódó szinonimákkal.</p>
+      <ul>
+        <li>A <strong>"⚙️ Szerkesztés"</strong> gombra kattintva egy új ablakban (<code>szotar.html</code>)
+          létrehozhatja saját szinonima-hálózatát.</li>
+        <li><strong>Formátum:</strong> Egy sorba egy fogalomkört írjon, egyenlőségjellel és vesszőkkel elválasztva. Pl.:
+          <code>oktatás = education, pedagógia, tanítás</code></li>
+      </ul>
+
+      <div class="kritikus">
+        <strong>⚠️ KRITIKUS: Készítsen biztonsági másolatot a szótárról!</strong><br>
+        A rendszer az Ön teljes adatvédelme érdekében a szótárat <strong>kizárólag az Ön böngészőjének belső
+          memóriájában (localStorage) tárolja</strong>. Ha Ön törli a böngészési előzményeket/sütiket, vagy másik
+        számítógépre ül át, a szótára elvész! <br><br>
+        <strong>Megoldás:</strong> A szótár szerkesztő felületén rendszeresen kattintson a <strong>⬇️ Letöltés
+          (.txt)</strong> gombra. Ha az adatok elvesznek, a <strong>⬆️ Betöltés (.txt)</strong> gombbal azonnal
+        visszaállíthatja a munkáját a lementett fájlból!
+      </div>
+
+      <h2>3. Szűrési Rendszer (Előszűrők és Utószűrők)</h2>
+
+      <h3>3.1. Előszűrők (Keresés szűkítése letöltés előtt)</h3>
+      <p>A bal oldali sáv tetején lévő előszűrők (Kiadás éve, Szerző, Folyóirat, Intézmény) a legfontosabbak, mert ezek
+        <strong>még azelőtt elküldik a korlátozást a szervernek, mielőtt a maximum 2000 találat letöltődne</strong>.
+        Ezzel elkerülhető, hogy a releváns cikkek "kiszoruljanak" a limitből.</p>
+      <div class="tipp">
+        <strong>Intelligens MTMT Kereső (🔍):</strong> Ha a Szerző, Folyóirat vagy Intézmény mező melletti nagyítóra
+        kattint, egy külön ablakban kereshet az MTMT adatbázisában. A rendszer a találatokat <strong>relevancia
+          szerint</strong> pontozza és rendezi: a tökéletes egyezések kerülnek a lista legelejére. A kiválasztott
+        entitás azonosítója (MTID) bekerül a mezőbe, garantálva a tűpontos szűrést.
+      </div>
+
+      <h3>3.2. Dinamikus szűkítés (Utólagos szűrés)</h3>
+      <p>A bal oldali sáv alsó felén lévő dobozok a már letöltött 2000 találaton belül végeznek azonnali, memóriában
+        futó szűrést (Év, Állapot, Nyelv, stb.). Bármelyiket bepipálja, a lista újratöltés nélkül frissül.</p>
+      <ul>
+        <li>Minden doboz tetején egy legördülő menüvel megadhatja, hogy a kipipált elemeket <strong>tartalmazza</strong>
+          a lista, vagy pont fordítva: <strong>zárja ki</strong> azokat.</li>
+      </ul>
+
+      <h2>4. Mentés, Betöltés és Újdonságfigyelés</h2>
+      <p>A jobb felső sarokban található <strong>💾 Keresés mentése</strong> gomb a teljes munkamenetet (keresőszavak,
+        előszűrők, SLR blokkok, kipipált dinamikus szűrők) elmenti egy <code>.json</code> fájlba a számítógépére (pl. a
+        példában bemutatott PTSD keresést a <code>Pelda-mentett-kereses.json</code> fájl tartalmazza).</p>
+
+      <div class="figyelem">
+        <strong>Újdonságfigyelés (Alerting):</strong> Amikor a <strong>📂 Keresés betöltése</strong> gombbal megnyit egy
+        korábban lementett fájlt, a rendszer érzékeli az eredeti mentés dátumát. Egy felugró ablakban megkérdezi, hogy
+        <em>"Szeretné, ha a rendszer CSAK azokat az ÚJ rekordokat mutatná, amelyeket azóta rögzítettek?"</em>. Igen
+        válasz esetén percek alatt kideríthető, milyen új irodalom jelent meg a témában az utolsó keresés óta!
+      </div>
+
+      <h2>5. Exportálás és Hivatkozások</h2>
+      <p>A találati lista jobb felső sarkában található <strong>Letöltés</strong> gomb a szakirodalom kinyerését szolgálja. A
+        szoftver csak azokat a cikkeket exportálja, amelyeket a kártyák melletti jelölőnégyzetben kipipált. Ha egyet sem jelöl
+        ki, az összes éppen látható találatot exportálja.</p>
+      <ul>
+        <li><strong>HTML Irodalomjegyzék:</strong> Legenerál egy böngészőben megnyíló, nyomtatható vagy Wordbe másolható
+          irodalomjegyzéket. A legördülő menüben kiválasztható a kívánt szabvány (APA, IEEE, MLA, Chicago).</li>
+        <li><strong>RIS (.ris):</strong> Szabványos metaadat-fájl, amelyet bármelyik bibliográfia-kezelő szoftver (Zotero,
+          Mendeley, EndNote) felismer. <em>(Megjegyzés: A rendszer automatikusan átkonvertálja az MTMT belső cikkszámait
+            szabványos RIS formátummá).</em></li>
+        <li><strong>BibTeX (.bib):</strong> LaTeX alapú szövegszerkesztők által használt adatbázis formátum (a kettős kapcsos
+          zárójelek biztosítják, hogy a címek kis- és nagybetűi ne torzuljanak el a rendereléskor).</li>
+      </ul>
+
+      <h2>6. Hálózatkutató Modul (OpenAlex Integráció)</h2>
+      <p>A hagyományos kulcsszavas keresésen túl a rendszer képes feltérképezni a "rejtett" szakirodalmat is a globális
+        <strong>OpenAlex</strong> adatbázis hálózatának segítségével. Ez a funkció különösen hasznos, ha a témájában szeretne
+        új, releváns cikkeket felfedezni, amelyekre a kulcsszavai nem adtak találatot.</p>
+
+      <h3>6.1. A hálózati elemzés lépései:</h3>
+      <ol>
+        <li>Jelöljön ki legalább egy (vagy több) kulcsfontosságú, releváns cikket a találati listában a kártyákon lévő
+          jelölőnégyzetekkel. Ekkor aktiválódik a <strong>🕸️ Kijelöltek hálózati elemzése</strong> gomb.</li>
+        <li>A gomb melletti jelölőnégyzetekkel válassza ki, milyen elemzést szeretne futtatni (akár mindkettőt is lehet
+          egyszerre).</li>
+        <li>Kattintson a hálózati elemzés gombra. A rendszer az MTMT-s cikkek DOI vagy OpenAlex azonosítója alapján lekérdezi
+          a globális hálózatot.</li>
+      </ol>
+
+      <h3>6.2. Elemzési módok:</h3>
+      <ul>
+        <li><strong>🔗 Bibliográfiai Csatolás:</strong> A rendszer megkeresi azokat a cikkeket, amelyeknek az irodalomjegyzéke
+          (felhasznált forrásai) jelentős mértékben megegyezik a kijelölt cikkekével. Ezek gyakran nagyon hasonló témájú,
+          "testvér" publikációk.</li>
+        <li><strong>⭐ Ko-citáció (Együttes Idézés):</strong> A rendszer megkeresi mindazokat a cikkeket, amelyek hivatkoznak
+          az Ön által kijelölt tételekre. Ezután összesíti, hogy ezen idéző cikkek irodalomjegyzékeiben mely MÁS publikációk
+          fordulnak elő a leggyakrabban. Az algoritmus a 10 leggyakrabban együtt idézett "Ko-citált Partnert" listázza ki. Ez
+          a funkció kiváló az alapművek és paradigmák megtalálására.</li>
+      </ul>
+
+      <div class="tipp">
+        <strong>A találatok beemelése (+ Hozzáadás gomb):</strong>
+        Az OpenAlex-ből származó új találatok a képernyő alján, egy különálló <strong>Hálózati Tálcán</strong> jelennek meg,
+        hogy ne keveredjenek az MTMT találatokkal. Ha valamelyik cikk megtetszik, kattintson a mellette lévő <strong>+
+          Hozzáadás</strong> gombra! A cikk ekkor azonnal felugrik a fő találati listába (egy jól látható <em>"🌐 Forrás:
+          OpenAlex"</em> címkével). Ezeket a beemelt cikkeket ezután már pontosan úgy exportálhatja RIS, BibTeX vagy HTML
+        formátumba, mintha az MTMT-ből származnának!
+      </div>
+
+      <div
+        style="margin-top: 40px; text-align: center; color: #999; font-size: 12px; border-top: 1px solid #eee; padding-top: 15px;">
+        MTMT szakirodalom kereső &copy; 2026 | Készült Vanilla HTML/JS technológiával.
+      </div>
+      </div>
+      </div>
+
+</body>
+
+</html>
+
+      

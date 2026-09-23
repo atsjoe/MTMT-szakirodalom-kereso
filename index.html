@@ -1,0 +1,2373 @@
+<!DOCTYPE html>
+<html lang="hu">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Szakirodalom kereső az MTMT-hez</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header class="fejlec">
+        <div class="kontener">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                <h1>MTMT szakirodalom kereső</h1>
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <button class="kicsi-gomb" style="background-color: #002244; color: white; padding: 8px 15px;"
+                        onclick="keresesMentes()">💾 Keresés mentése</button>
+                    <button class="kicsi-gomb" style="background-color: #002244; color: white; padding: 8px 15px;"
+                        onclick="document.getElementById('fajl-feltolto').click()">📂 Keresés betöltése</button>
+                    <a href="sugo.html" target="_blank" class="kicsi-gomb"
+                        style="background-color: #ffc107; color: #000; text-decoration: none; padding: 8px 15px; display: inline-flex; align-items: center; font-weight: bold;">❓
+                        Súgó</a>
+                    <input type="file" id="fajl-feltolto" style="display:none" accept=".json"
+                        onchange="keresesBetoltese(event)">
+                </div>
+            </div>
+
+            <div class="mod-valaszto-gombok">
+                <button id="gomb-egyszeru" class="mod-gomb aktiv" onclick="valtasKeresoMod('egyszeru')">1. Egyszerű
+                    keresés</button>
+                <button id="gomb-osszetett" class="mod-gomb" onclick="valtasKeresoMod('osszetett')">2. Szisztematikus
+                    (SLR)</button>
+            </div>
+
+            <div id="normal-kereso-kontener" class="normal-kereso-kontener">
+                <div id="normal-kereso-sav" style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
+                    <!-- Ide emelődnek be dinamikusan az előszűrőkből kiválasztott szempontok ÉS kapcsolattal -->
+                    <div id="beemelt-tokenek-tarolo" style="display: inline-flex; align-items: center; flex-wrap: wrap; gap: 6px;"></div>
+
+                    <!-- Szabad szöveges keresőmező -->
+                    <input type="text" id="keresoszoveg" placeholder='Pl.: stress brain* "systematic review" -post*'
+                        style="flex-grow: 1; min-width: 220px; padding: 8px 8px; font-size: 15px; border: none; outline: none; background: transparent; color: #222;">
+                    
+                    <button class="kereso-gomb-kiemelt" onclick="szerverKereses()" title="Keresés indítása a beírt szavakkal és az aktív előszűrőkkel">🔍 Keresés</button>
+                    <button onclick="ujKereses()" style="background-color: #6c757d; color: white; border: none; padding: 8px 14px; font-weight: bold; border-radius: 4px; cursor: pointer;">Törlés</button>
+                </div>
+                <!-- Segítő információs sáv ha van aktív beemelt előszűrő -->
+                <div id="beemelt-szurok-info" style="display: none; font-size: 11px; color: #004481; font-weight: 600; padding: 5px 2px 2px 2px; border-top: 1px dashed #d0e0f0; margin-top: 5px;">
+                    ℹ️ Az előszűrőkben kijelölt szempontok logikai <strong>ÉS</strong> kapcsolattal érvényesülnek. A keresés futtatásához kattintson a <strong>Keresés</strong> gombra!
+                </div>
+            </div>
+
+            <div id="osszetett-panel"
+                style="display: none; background: #f4f7f6; padding: 15px; border-radius: 5px; border: 1px solid #dce8e6;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <p style="margin-top:0; font-size:13px; color:#333; font-weight: bold;">Szisztematikus keresés
+                            (építőkockák)</p>
+                        <p style="margin-top:0; font-size:12px; color:#666;">A sorokon belül szinonimák (VAGY
+                            kapcsolat), a sorok között feltételek (ÉS kapcsolat) vannak.</p>
+                    </div>
+                    <div
+                        style="background: #fff; padding: 5px 10px; border-radius: 4px; border: 1px solid #ccc; font-size: 12px; display: flex; align-items: center; gap: 10px;">
+                        <label><strong>Saját Tezaurusz:</strong></label>
+                        <a href="szotar.html" id="szotar-szerkeszto-link" target="_blank"
+                            style="color: #004481; text-decoration: none; font-weight: bold;"
+                            title="Saját szótár szerkesztése">⚙️ Javaslat-szótár szerkesztése</a>
+                    </div>
+                </div>
+
+                <div id="osszetett-sorok-tarolo" style="margin-top: 15px;"></div>
+
+                <div
+                    style="margin-top: 15px; display: flex; align-items: center; gap: 10px; border-top: 1px dashed #ccc; padding-top: 15px;">
+                    <span
+                        style="display:inline-block; width: 80px; font-weight:bold; color:#d9534f; font-size: 13px;">KIZÁRVA:</span>
+                    <input type="text" id="osszetett-kizarva" class="osszetett-input-kizarva"
+                        style="flex-grow: 1; padding: 6px; border: 1px solid #ccc; border-radius: 3px;"
+                        placeholder="Ide írhatja az elrejteni kívánt kifejezéseket...">
+                </div>
+
+                <div style="margin-top: 15px; display: flex; gap: 10px;">
+                    <button class="kicsi-gomb" style="background-color: #004481; color: white;"
+                        onclick="ujKeresoSor()">+ Új ÉS feltétel (blokk)</button>
+                    <button class="kicsi-gomb"
+                        style="background-color: #28a745; color: white; font-weight: bold; padding: 6px 15px;"
+                        onclick="szerverKereses()">Keresés futtatása</button>
+                    <button class="kicsi-gomb" style="background-color: #6c757d; color: white;"
+                        onclick="ujKereses()">Törlés</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="kontener fo-elrendezes">
+        <aside class="szuro-oszlop">
+            <div id="eloszuro-blokk">
+                <h3 style="margin-top: 0; color: #004481;">Előszűrők</h3>
+                <p style="font-size: 11px; color: #666; margin-top:-5px; margin-bottom: 10px;">Keresés szűkítése a
+                    letöltés előtt</p>
+
+                <div class="szuro-doboz" style="padding-bottom: 5px;">
+                    <h4 style="margin-bottom: 5px;">Közlemény szerepe</h4>
+                    <select id="input-eloszuro-allapot"
+                        style="width: 100%; padding: 4px; border: 1px solid #ccc; border-radius: 3px; font-size: 12px;">
+                        <option value="mind">Mind (Forrás és Idéző is)</option>
+                        <option value="forras">Csak Forrásközlemény</option>
+                        <option value="idezo">Csak Idéző közlemény</option>
+                    </select>
+                </div>
+
+                <div class="szuro-doboz" style="padding-bottom: 5px;">
+                    <h4 style="margin-bottom: 5px;">Kiadás éve</h4>
+                    <div style="display: flex; gap: 5px;">
+                        <input type="number" id="input-eloszuro-ev-tol" placeholder="Tól (pl. 2018)"
+                            style="flex-grow: 1; padding: 4px; border: 1px solid #ccc; border-radius: 3px; font-size: 12px;"
+                            min="1900" max="2100">
+                        <input type="number" id="input-eloszuro-ev-ig" placeholder="Ig (pl. 2024)"
+                            style="flex-grow: 1; padding: 4px; border: 1px solid #ccc; border-radius: 3px; font-size: 12px;"
+                            min="1900" max="2100">
+                    </div>
+                </div>
+
+                <div class="szuro-doboz" style="padding-bottom: 5px;">
+                    <h4 style="margin-bottom: 5px;">Szerző</h4>
+                    <div style="display: flex; gap: 5px;">
+                        <input type="text" id="input-eloszuro-author" placeholder="Név..."
+                            style="flex-grow: 1; padding: 4px; border: 1px solid #ccc; border-radius: 3px; font-size: 12px;">
+                        <button class="kicsi-gomb"
+                            style="padding: 4px 8px; background-color: #ffc107; color: #000; border: none; font-weight: bold; cursor: pointer;"
+                            onclick="univerzelisKeresoMTMT('eloszuro-author', this, 'author')"
+                            title="MTMT keresés">🔍</button>
+                    </div>
+                </div>
+                <div class="szuro-doboz" style="padding-bottom: 5px;">
+                    <h4 style="margin-bottom: 5px;">Folyóirat / Sorozat</h4>
+                    <div style="display: flex; gap: 5px;">
+                        <input type="text" id="input-eloszuro-journal" placeholder="Folyóirat címe..."
+                            style="flex-grow: 1; padding: 4px; border: 1px solid #ccc; border-radius: 3px; font-size: 12px;">
+                        <button class="kicsi-gomb"
+                            style="padding: 4px 8px; background-color: #ffc107; color: #000; border: none; font-weight: bold; cursor: pointer;"
+                            onclick="univerzelisKeresoMTMT('eloszuro-journal', this, 'journal')"
+                            title="MTMT keresés">🔍</button>
+                    </div>
+                </div>
+                <div class="szuro-doboz">
+                    <h4 style="margin-bottom: 5px;">Intézmény</h4>
+                    <div style="display: flex; gap: 5px;">
+                        <input type="text" id="input-eloszuro-institute" placeholder="Intézmény neve..."
+                            style="flex-grow: 1; padding: 4px; border: 1px solid #ccc; border-radius: 3px; font-size: 12px;">
+                        <button class="kicsi-gomb"
+                            style="padding: 4px 8px; background-color: #ffc107; color: #000; border: none; font-weight: bold; cursor: pointer;"
+                            onclick="univerzelisKeresoMTMT('eloszuro-institute', this, 'institute')"
+                            title="MTMT keresés">🔍</button>
+                    </div>
+                </div>
+            </div>
+
+            <hr style="border: 0; border-top: 1px dashed #ccc; margin: 15px 0;">
+
+            <h3>Dinamikus szűkítés</h3>
+            <div class="szuro-doboz">
+                <h4>Megjelenés éve</h4><select id="ev-mod" class="mod-valaszto" onchange="kliensSzures()">
+                    <option value="tartalmaz">Kiválasztottak mutatása</option>
+                    <option value="kizar">Kiválasztottak kizárása</option>
+                </select>
+                <div id="ev-lista" class="gorgetheto-lista">
+                    <p class="alap-uzenet">Várja az adatokat...</p>
+                </div>
+            </div>
+            <div class="szuro-doboz">
+                <h4>Közlemény szerepe</h4><select id="allapot-mod" class="mod-valaszto" onchange="kliensSzures()">
+                    <option value="tartalmaz">Kiválasztottak mutatása</option>
+                    <option value="kizar">Kiválasztottak kizárása</option>
+                </select>
+                <div id="allapot-lista" class="gorgetheto-lista">
+                    <p class="alap-uzenet">Várja az adatokat...</p>
+                </div>
+            </div>
+            <div class="szuro-doboz">
+                <h4>Jelleg (célcsoport)</h4><select id="jelleg-mod" class="mod-valaszto" onchange="kliensSzures()">
+                    <option value="tartalmaz">Kiválasztottak mutatása</option>
+                    <option value="kizar">Kiválasztottak kizárása</option>
+                </select>
+                <div id="jelleg-lista" class="gorgetheto-lista">
+                    <p class="alap-uzenet">Várja az adatokat...</p>
+                </div>
+            </div>
+            <div class="szuro-doboz">
+                <h4>Típus (űrlap)</h4><select id="tipus-mod" class="mod-valaszto" onchange="kliensSzures()">
+                    <option value="tartalmaz">Kiválasztottak mutatása</option>
+                    <option value="kizar">Kiválasztottak kizárása</option>
+                </select>
+                <div id="tipus-lista" class="gorgetheto-lista">
+                    <p class="alap-uzenet">Várja az adatokat...</p>
+                </div>
+            </div>
+            <div class="szuro-doboz">
+                <h4>Besorolás (dokumentumtípus)</h4><select id="besorolas-mod" class="mod-valaszto"
+                    onchange="kliensSzures()">
+                    <option value="tartalmaz">Kiválasztottak mutatása</option>
+                    <option value="kizar">Kiválasztottak kizárása</option>
+                </select>
+                <div id="besorolas-lista" class="gorgetheto-lista">
+                    <p class="alap-uzenet">Várja az adatokat...</p>
+                </div>
+            </div>
+            <div class="szuro-doboz">
+                <h4>Nyelv</h4><select id="nyelv-mod" class="mod-valaszto" onchange="kliensSzures()">
+                    <option value="tartalmaz">Kiválasztottak mutatása</option>
+                    <option value="kizar">Kiválasztottak kizárása</option>
+                </select>
+                <div id="nyelv-lista" class="gorgetheto-lista">
+                    <p class="alap-uzenet">Várja az adatokat...</p>
+                </div>
+            </div>
+        </aside>
+
+        <section class="talalatok-oszlop">
+            <div class="talalat-fejlec" style="flex-wrap: wrap; gap: 10px;">
+                <h2>Találatok</h2>
+                <div class="export-gombok" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+
+                    <!-- HÁLÓZATI PANEL ÉS GOMB -->
+                    <div
+                        style="display: flex; flex-direction: column; font-size: 11px; background: #fdf3f8; padding: 4px 8px; border-radius: 4px; border: 1px solid #f8bbd0;">
+                        <label style="cursor: pointer;"><input type="checkbox" id="cb-bib-csatolas" checked> 🔗
+                            Bibliográfiai csatolás</label>
+                        <label style="cursor: pointer;"><input type="checkbox" id="cb-kocitacio" checked> ⭐
+                            Ko-citáció</label>
+                    </div>
+
+                    <button id="gomb-halozati-elemzes" class="kicsi-gomb gomb-halozat" disabled>
+                        🕸️ Kijelöltek hálózati elemzése
+                    </button>
+
+                    <span style="color: #ccc;">|</span>
+
+                    <!-- ÖSSZEVONT EXPORT MENÜ ÉS LETÖLTÉS GOMB -->
+                    <select id="idezet-stilus" class="kicsi-gomb"
+                        style="padding: 4px; border: 1px solid #ccc; background-color: #fff;">
+                        <optgroup label="HTML Irodalomjegyzék">
+                            <option value="html-apa">APA formátum</option>
+                            <option value="html-ieee">IEEE formátum</option>
+                            <option value="html-mla">MLA formátum</option>
+                            <option value="html-chicago">Chicago formátum</option>
+                        </optgroup>
+                        <optgroup label="Adatbázis export">
+                            <option value="ris">RIS formátum (.ris)</option>
+                            <option value="bibtex">BibTeX formátum (.bib)</option>
+                            <option value="csl">CSL-JSON formátum (.json)</option>
+                        </optgroup>
+                    </select>
+                    <button class="kicsi-gomb" onclick="kombinaltExportalas()"
+                        style="background-color: #17a2b8; color: white;">Letöltés</button>
+                </div>
+            </div>
+
+            <div id="aktiv-szurok-tarolo" class="aktiv-szurok-tarolo" style="display: none;">
+                <strong>Aktív feltételek:</strong>
+                <div id="aktiv-szurok-lista" style="display: flex; flex-wrap: wrap; gap: 5px;"></div>
+                <button class="kicsi-gomb" style="margin-left: auto;" onclick="osszesSzuroTorlese()">Szűrők
+                    törlése</button>
+            </div>
+
+            <div id="eredmeny">
+                <p class="alap-uzenet">Kérjük, adja meg a keresési feltételeket a fenti mezőkben...</p>
+            </div>
+
+            <div id="halozati-talca" class="halozati-talca-kontener" style="display: none;">
+                <div class="halozati-fejlec-sav">
+                    <h2 style="margin: 0; color: #e83e8c;">🕸️ Hálózati Tálca (OpenAlex)</h2>
+                    <button class="kicsi-gomb" onclick="document.getElementById('halozati-talca').style.display='none'"
+                        style="background-color: #fff; border: 1px solid #ccc;">Elrejtés</button>
+                </div>
+                <p style="font-size: 13px; color: #666; margin-top: 0;">Ide kerülnek a bibliográfiai csatolás és
+                    ko-citáció alapján javasolt, OpenAlex-ből származó kapcsolódó szakirodalmak. Ezek a tételek nem
+                    írják felül az MTMT találatokat, amíg hozzá nem adja őket.</p>
+                <div id="halozati-eredmeny">
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <div id="mtmt-modal" class="modal-hatter" onclick="zardBeMTMTModal(event)">
+        <div class="modal-tartalom" onclick="event.stopPropagation()">
+            <div class="modal-fejlec">
+                <h3 id="mtmt-modal-cim" style="margin: 0; color: #004481;">Kiválasztás az MTMT-ből</h3>
+                <span onclick="document.getElementById('mtmt-modal').style.display='none'"
+                    style="color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; line-height: 1;">&times;</span>
+            </div>
+            <p style="font-size: 13px; color: #555; margin-top: 0;">Kattintson a megfelelő találatra a lenti listában a
+                kiválasztáshoz!</p>
+            <div id="mtmt-talalatok" class="szerzo-lista-tarolo">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const LETOLTESI_LIMIT = 2000;
+        let aktualisTalalatok = [];
+        let megjelenoTalalatok = [];
+        let szerverOsszesTalalat = 0;
+        let betoltottSzurok = null;
+        let ujRekordokDatumTol = null;
+        let keresoMod = 'egyszeru';
+        let aktualisModalSorId = null;
+
+        function feldolgozSzotarat(nyersSzoveg) {
+            let szotarKlaszterek = [];
+            let sorok = nyersSzoveg.split('\n');
+            sorok.forEach(sor => {
+                if (sor.includes('=')) {
+                    let reszek = sor.split('=');
+                    let kulcs = reszek[0].trim().toLowerCase();
+                    let szinonimak = reszek[1].split(',').map(s => s.trim().toLowerCase()).filter(s => s !== '');
+                    let klaszter = new Set([kulcs, ...szinonimak]);
+                    szotarKlaszterek.push(klaszter);
+                }
+            });
+            return szotarKlaszterek;
+        }
+
+        function getAktivSzotarKlaszterek() {
+            let mentettNyers = localStorage.getItem('mtmtSajatSzotar');
+            if (!mentettNyers) {
+                alert("A saját szótára még üres. Kérjük, a '⚙️ Szerkesztés' gombra kattintva hozzon létre szabályokat!");
+                return null;
+            }
+            return feldolgozSzotarat(mentettNyers);
+        }
+
+        function zardBeMTMTModal(event) {
+            document.getElementById('mtmt-modal').style.display = 'none';
+        }
+
+        function frissitGomb(selectElem, sorId) {
+            const gomb = document.getElementById('gomb-' + sorId);
+            if (selectElem.value === 'label') {
+                gomb.innerHTML = '💡 Javaslat';
+                gomb.title = 'Szinonimák javaslata';
+            } else {
+                gomb.innerHTML = '🔍 Keresés';
+                gomb.title = 'Keresés az MTMT adatbázisában';
+            }
+        }
+
+        function sikeresGombVisszajelzes(gombElem) {
+            gombElem.style.backgroundColor = "#28a745";
+            gombElem.style.color = "white";
+            setTimeout(() => {
+                gombElem.style.backgroundColor = "#ffc107";
+                gombElem.style.color = "#000";
+            }, 1000);
+        }
+
+        async function fetchAllPages(baseUrl) {
+            try {
+                let r1 = await fetch(baseUrl + '&page=1');
+                if (!r1.ok) return [];
+                let d1 = await r1.json();
+                let items = [];
+                if (d1 && d1.content) items.push(...d1.content);
+
+                let totalPages = d1.paging ? d1.paging.totalPages : 1;
+                if (totalPages > 1) {
+                    let maxPage = Math.min(totalPages, 50);
+                    let promisek = [];
+                    for (let i = 2; i <= maxPage; i++) {
+                        promisek.push(fetch(baseUrl + '&page=' + i).then(r => r.ok ? r.json() : { content: [] }));
+                    }
+                    let resArr = await Promise.all(promisek);
+                    resArr.forEach(res => {
+                        if (res && res.content) items.push(...res.content);
+                    });
+                }
+                return items;
+            } catch (e) {
+                console.error("Hiba a lapozás során:", e);
+                return [];
+            }
+        }
+
+        async function univerzelisKeresoMTMT(sorId, gombElem, tipus) {
+            const input = document.getElementById('input-' + sorId);
+            const teljesSzoveg = input.value;
+            const reszek = teljesSzoveg.split(',');
+            let nev = reszek[reszek.length - 1].trim();
+            let tisztaNev = nev.replace(/\*/g, '');
+
+            if (tisztaNev.length < 3) {
+                alert("Kérjük, írjon be legalább 3 karaktert a kereséshez!");
+                return;
+            }
+
+            aktualisModalSorId = sorId;
+            const eredetiSzoveg = gombElem.innerText;
+            gombElem.innerText = "⏳...";
+
+            let vegpont = '';
+            if (tipus === 'author') {
+                document.getElementById('mtmt-modal-cim').innerText = "Szerző kiválasztása az MTMT-ből";
+                vegpont = 'author';
+            } else if (tipus === 'journal') {
+                document.getElementById('mtmt-modal-cim').innerText = "Folyóirat / Sorozat kiválasztása";
+                vegpont = 'periodical';
+            } else if (tipus === 'institute') {
+                document.getElementById('mtmt-modal-cim').innerText = "Intézmény kiválasztása az MTMT-ből";
+                vegpont = 'institute';
+            }
+
+            try {
+                let cacheBuster = Date.now();
+                let encNev = encodeURIComponent(tisztaNev);
+
+                let url1 = `https://m2.mtmt.hu/api/${vegpont}/?size=2000&format=json&cond=label;any;${encNev}&_t=${cacheBuster}`;
+                let p1 = fetchAllPages(url1);
+
+                let p2 = Promise.resolve([]);
+                if (vegpont === 'periodical') {
+                    let url2 = `https://m2.mtmt.hu/api/${vegpont}/?size=2000&format=json&cond=title;eq;${encNev}&_t=${cacheBuster}`;
+                    p2 = fetchAllPages(url2);
+                }
+
+                let [adat1, adat2] = await Promise.all([p1, p2]);
+                let letoltottElemek = [...adat1, ...adat2];
+
+                let szavak = tisztaNev.toLowerCase().split(/\s+/).filter(w => w.length > 0);
+
+                let tisztaTalalatok = letoltottElemek.filter(elem => {
+                    let mezo = ((elem.label || "") + " " + (elem.title || "")).toLowerCase();
+                    for (let szo of szavak) {
+                        if (!mezo.includes(szo)) return false;
+                    }
+                    return true;
+                });
+
+                let veglegesTalalatok = tisztaTalalatok;
+
+                let egyediTalalatok = [];
+                let latottIdk = new Set();
+                veglegesTalalatok.forEach(elem => {
+                    if (!latottIdk.has(elem.mtid)) {
+                        latottIdk.add(elem.mtid);
+                        egyediTalalatok.push(elem);
+                    }
+                });
+
+                let keresettKifejezes = tisztaNev.toLowerCase();
+
+                egyediTalalatok.sort((a, b) => {
+                    let labelA = (a.label || "").toLowerCase();
+                    let titleA = (a.title || "").toLowerCase();
+                    let szovegA = labelA + " " + titleA;
+
+                    let labelB = (b.label || "").toLowerCase();
+                    let titleB = (b.title || "").toLowerCase();
+                    let szovegB = labelB + " " + titleB;
+
+                    const calcScore = (szoveg, label, title) => {
+                        if (!szoveg) return 0;
+
+                        let tisztaLabel = label.replace(/\s?[0-9]{4}-[0-9]{3}[0-9xX]/g, '').trim();
+
+                        if (tisztaLabel === keresettKifejezes || title === keresettKifejezes) return 100;
+                        if (tisztaLabel.startsWith(keresettKifejezes) || title.startsWith(keresettKifejezes)) return 80;
+                        if (szoveg.includes(keresettKifejezes)) return 60;
+                        return 10;
+                    };
+
+                    let scoreA = calcScore(szovegA, labelA, titleA);
+                    let scoreB = calcScore(szovegB, labelB, titleB);
+
+                    if (scoreA !== scoreB) {
+                        return scoreB - scoreA;
+                    }
+                    return labelA.localeCompare(labelB, 'hu');
+                });
+
+                const talalatokDiv = document.getElementById('mtmt-talalatok');
+                talalatokDiv.innerHTML = '';
+
+                let mutathatoElemek = egyediTalalatok.slice(0, 500);
+
+                if (mutathatoElemek.length > 0) {
+                    mutathatoElemek.forEach(elem => {
+                        let reszletek = "";
+                        let ikon = "";
+                        let prefix = "";
+
+                        if (tipus === 'author') {
+                            ikon = '👤';
+                            if (elem.affiliations && elem.affiliations.length > 0 && elem.affiliations[0].institute) {
+                                reszletek = `🏛️ ${elem.affiliations[0].institute.label}`;
+                            }
+                        } else if (tipus === 'journal') {
+                            let isJournal = elem.ctype === 'journal' || !elem.ctype;
+                            ikon = isJournal ? '📚' : '📖';
+                            prefix = isJournal ? 'J' : 'S';
+
+                            let isns = [];
+                            if (elem.pIssn || elem.pissn) isns.push("P-ISSN: " + (elem.pIssn || elem.pissn));
+                            if (elem.eIssn || elem.eissn) isns.push("E-ISSN: " + (elem.eIssn || elem.eissn));
+                            let pontosTipus = (elem.types && elem.types.length > 0) ? elem.types[0] : (isJournal ? 'Folyóirat' : 'Sorozat');
+                            reszletek = `Típus: ${pontosTipus}${isns.length > 0 ? ` | ${isns.join(', ')}` : ''}`;
+                        } else if (tipus === 'institute') {
+                            ikon = '🏛️';
+                            prefix = 'I';
+                            if (elem.parent && elem.parent.label) {
+                                reszletek = `⬆️ Szülőintézmény: ${elem.parent.label}`;
+                            }
+                        }
+
+                        let idSzoveg = prefix ? `[${prefix}:${elem.mtid}]` : `[${elem.mtid}]`;
+
+                        let div = document.createElement('div');
+                        div.className = 'szerzo-elem';
+                        div.innerHTML = `
+                                        <div class="szerzo-nev">${ikon} ${elem.label} ${idSzoveg}</div>
+                                        ${reszletek ? `<div class="szerzo-intezmeny">${reszletek}</div>` : ''}
+                                    `;
+
+                        div.onclick = function () {
+                            reszek[reszek.length - 1] = ` ${elem.label} ${idSzoveg}`;
+                            let ujTartalom = reszek.join(',').trim();
+                            if (ujTartalom.startsWith(',')) ujTartalom = ujTartalom.substring(1).trim();
+                            document.getElementById('input-' + aktualisModalSorId).value = ujTartalom;
+                            document.getElementById('mtmt-modal').style.display = 'none';
+                            sikeresGombVisszajelzes(gombElem);
+                            if (typeof frissitBeemeltEloszurok === 'function') {
+                                frissitBeemeltEloszurok();
+                            }
+                        };
+                        talalatokDiv.appendChild(div);
+                    });
+
+                    if (egyediTalalatok.length > 500) {
+                        let figyelmeztetes = document.createElement('div');
+                        figyelmeztetes.style.cssText = "padding: 10px; background: #fff3cd; color: #856404; text-align: center; font-size: 12px; font-weight: bold; margin-top: 10px; border-radius: 4px;";
+                        figyelmeztetes.innerText = `Több mint ${egyediTalalatok.length} találat! Csak a legrelevánsabb 500 látható a gyorsaság érdekében. Kérjük, gépeljen be több szót a pontosításhoz!`;
+                        talalatokDiv.appendChild(figyelmeztetes);
+                    } else if (egyediTalalatok.length >= 100) {
+                        let figyelmeztetes = document.createElement('div');
+                        figyelmeztetes.style.cssText = "padding: 10px; background: #d4edda; color: #155724; text-align: center; font-size: 12px; font-weight: bold; margin-top: 10px; border-radius: 4px;";
+                        figyelmeztetes.innerText = `A keresés sok találatot eredményezett. A lista a legrelevánsabbakkal kezdődik!`;
+                        talalatokDiv.appendChild(figyelmeztetes);
+                    }
+
+                    document.getElementById('mtmt-modal').style.display = 'block';
+                } else {
+                    alert("Nem található megfelelő találat az MTMT-ben. Kérjük próbáljon meg más kifejezést!");
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Hiba történt az MTMT elérésekor.");
+            } finally {
+                gombElem.innerText = eredetiSzoveg;
+            }
+        }
+
+        function javasolSzinonimakat(gombElem) {
+            let inputMezo = gombElem.parentElement.querySelector('.osszetett-input');
+            let jelenlegiSzoveg = inputMezo.value;
+
+            if (!jelenlegiSzoveg.trim()) {
+                alert("Kérjük, írjon be legalább egy fogalmat a mezőbe, amihez szinonimákat kereshetünk!");
+                return;
+            }
+
+            let klaszterek = getAktivSzotarKlaszterek();
+            if (!klaszterek) return;
+
+            let szavak = jelenlegiSzoveg.split(',').map(s => s.trim().toLowerCase());
+            let ujSzavak = new Set(szavak);
+            let talaltSzinonimat = false;
+
+            szavak.forEach(szo => {
+                klaszterek.forEach(klaszter => {
+                    if (klaszter.has(szo)) {
+                        klaszter.forEach(szinonima => {
+                            if (!ujSzavak.has(szinonima)) {
+                                ujSzavak.add(szinonima);
+                                talaltSzinonimat = true;
+                            }
+                        });
+                    }
+                });
+            });
+
+            if (talaltSzinonimat) {
+                inputMezo.value = Array.from(ujSzavak).join(', ');
+                sikeresGombVisszajelzes(gombElem);
+            } else {
+                alert("A saját szótára nem tartalmaz ehhez a kifejezéshez szinonimát.");
+            }
+        }
+
+        function kezeldAJavaslatot(sorId, gombElem) {
+            const tipus = document.getElementById('select-' + sorId).value;
+            if (tipus === 'author' || tipus === 'journal' || tipus === 'institute') {
+                univerzelisKeresoMTMT(sorId, gombElem, tipus);
+            } else {
+                javasolSzinonimakat(gombElem);
+            }
+        }
+
+        function pontosKereses(szoveg, szo) {
+            let reszlegesVegen = szo.endsWith('*');
+            let tisztaSzo = reszlegesVegen ? szo.slice(0, -1) : szo;
+            let escaped = tisztaSzo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            let minta = '(^|[^a-záéíóöőúüűA-ZÁÉÍÓÖŐÚÜŰ0-9])' + escaped;
+
+            if (!reszlegesVegen) {
+                minta += '($|[^a-záéíóöőúüűA-ZÁÉÍÓÖŐÚÜŰ0-9])';
+            }
+            let regex = new RegExp(minta, 'i');
+            return regex.test(szoveg);
+        }
+
+        function valtasKeresoMod(ujMod) {
+            keresoMod = ujMod;
+            document.querySelectorAll('.mod-gomb').forEach(g => g.classList.remove('aktiv'));
+            document.getElementById('gomb-' + ujMod).classList.add('aktiv');
+
+            document.getElementById('normal-kereso-sav').style.display = (ujMod === 'egyszeru') ? "flex" : "none";
+            document.getElementById('osszetett-panel').style.display = (ujMod === 'osszetett') ? "block" : "none";
+
+            if (ujMod === 'osszetett' && document.getElementById('osszetett-sorok-tarolo').children.length === 0) {
+                ujKeresoSor("", "label");
+                ujKeresoSor("", "label");
+            }
+        }
+
+        function ujKeresoSor(alapErtek = "", alapMezo = "label") {
+            const tarolo = document.getElementById('osszetett-sorok-tarolo');
+            const sorId = Date.now() + Math.floor(Math.random() * 1000);
+            const sorszam = tarolo.children.length + 1;
+            const div = document.createElement('div');
+            div.className = "osszetett-sor";
+            div.style.cssText = "margin-bottom: 12px; display: flex; align-items: center; gap: 10px; background: #fff; padding: 10px; border-radius: 4px; border: 1px solid #eee;";
+
+            let felirat = sorszam === 1 ? `1. blokk:` : `ÉS ${sorszam}. blokk:`;
+            let gombSzoveg = alapMezo === 'label' ? '💡 Javaslat' : '🔍 Keresés';
+
+            div.innerHTML = `
+                                    <span style="display:inline-block; width: 70px; font-weight:bold; color:#004481; font-size: 12px;">${felirat}</span>
+                                    <input type="text" id="input-${sorId}" class="osszetett-input" style="flex-grow: 1; padding: 6px; border: 1px solid #ccc; border-radius: 3px;" value="${alapErtek}" placeholder="Kulcsszavak, nevek, azonosítók...">
+                                    
+                                    <select id="select-${sorId}" class="mezovallaszto" style="padding: 5px; font-size: 11px; border: 1px solid #ccc; border-radius: 3px;" onchange="frissitGomb(this, '${sorId}')">
+                                        <option value="label" ${alapMezo === 'label' ? 'selected' : ''}>Minden metaadat</option>
+                                        <option value="author" ${alapMezo === 'author' ? 'selected' : ''}>Szerző (azonosított)</option>
+                                        <option value="journal" ${alapMezo === 'journal' ? 'selected' : ''}>Folyóirat, sorozat</option>
+                                        <option value="institute" ${alapMezo === 'institute' ? 'selected' : ''}>Intézmény (előd/alintézm.)</option>
+                                    </select>
+                
+                                    <button id="gomb-${sorId}" class="kicsi-gomb" style="background:#ffc107; color:#000; border:none; padding: 6px 10px; font-weight:bold; min-width: 90px;" onclick="kezeldAJavaslatot('${sorId}', this)">${gombSzoveg}</button>
+                                    ${sorszam > 1 ? `<button class="kicsi-gomb" style="background:#d9534f; color:white; border:none; padding: 6px 10px;" onclick="this.parentElement.remove()">Törlés</button>` : `<div style="width: 55px;"></div>`}
+                                `;
+            tarolo.appendChild(div);
+        }
+
+        function getOsszetettFeltetelek() {
+            let blokkok = [];
+            document.querySelectorAll('.osszetett-sor').forEach(sor => {
+                let input = sor.querySelector('.osszetett-input');
+                let select = sor.querySelector('.mezovallaszto');
+
+                let szavak = input.value.split(',').map(s => s.trim().replace(/"/g, '')).filter(s => s !== '');
+                if (select.value === 'label') {
+                    szavak = szavak.map(s => s.toLowerCase());
+                }
+
+                if (szavak.length > 0) {
+                    let objTomb = szavak.map(s => ({ szo: s, mezo: select.value }));
+                    blokkok.push(objTomb);
+                }
+            });
+            return blokkok;
+        }
+
+        function generaljKombinaciokat(blokkok) {
+            if (blokkok.length === 0) return [];
+            if (blokkok.length === 1) return blokkok[0].map(feltetel => [feltetel]);
+            let eredmeny = blokkok[0].map(feltetel => [feltetel]);
+            for (let i = 1; i < blokkok.length; i++) {
+                let ujEredmeny = [];
+                let jelenlegiBlokk = blokkok[i];
+                eredmeny.forEach(kombinacio => {
+                    jelenlegiBlokk.forEach(feltetel => {
+                        ujEredmeny.push([...kombinacio, feltetel]);
+                    });
+                });
+                eredmeny = ujEredmeny;
+            }
+            return eredmeny;
+        }
+
+        function getPubAllapot(pub) {
+            let isCore = pub.core === true;
+            let isCitation = pub.citation === true;
+            if (isCore || (!isCore && !isCitation)) return "Forrásközlemény";
+            if (!isCore && isCitation) return "Idéző közlemény";
+            return "Egyéb / Ismeretlen";
+        }
+
+        function okosKeresoFeldolgozo(szoveg) {
+            let tartalmazza = [];
+            let kizarja = [];
+            let darabok = szoveg.match(/(-?"[^"]+")|(-?[^\s]+)/g);
+            if (darabok) {
+                darabok.forEach(darab => {
+                    let kizar = false;
+                    if (darab.startsWith('-')) { kizar = true; darab = darab.substring(1); }
+                    if (darab.startsWith('+')) { darab = darab.substring(1); }
+                    darab = darab.replace(/"/g, '').toLowerCase().trim();
+                    if (darab.length > 0) {
+                        if (kizar) kizarja.push(darab);
+                        else tartalmazza.push(darab);
+                    }
+                });
+            }
+            return { tartalmazza, kizarja };
+        }
+
+        function uresSzurok() {
+            const alapUzenet = '<p class="alap-uzenet">Várja az adatokat...</p>';
+            if (document.getElementById('ev-lista')) document.getElementById('ev-lista').innerHTML = alapUzenet;
+            if (document.getElementById('allapot-lista')) document.getElementById('allapot-lista').innerHTML = alapUzenet;
+            if (document.getElementById('jelleg-lista')) document.getElementById('jelleg-lista').innerHTML = alapUzenet;
+            if (document.getElementById('tipus-lista')) document.getElementById('tipus-lista').innerHTML = alapUzenet;
+            if (document.getElementById('besorolas-lista')) document.getElementById('besorolas-lista').innerHTML = alapUzenet;
+            if (document.getElementById('nyelv-lista')) document.getElementById('nyelv-lista').innerHTML = alapUzenet;
+        }
+
+        // =========================================================================
+        // KERESÉS TÖRLÉSE (ÉS A TELJES RENDSZER ALAPHELYZETBE ÁLLÍTÁSA)
+        // =========================================================================
+        function ujKereses() {
+            // 1. UI keresőmezők nullázása
+            document.getElementById('keresoszoveg').value = '';
+            document.getElementById('osszetett-sorok-tarolo').innerHTML = '';
+            if (document.getElementById('osszetett-kizarva')) document.getElementById('osszetett-kizarva').value = '';
+
+            // 2. Előszűrők alaphelyzetbe állítása
+            if (document.getElementById('input-eloszuro-allapot')) document.getElementById('input-eloszuro-allapot').value = 'mind';
+            if (document.getElementById('input-eloszuro-ev-tol')) document.getElementById('input-eloszuro-ev-tol').value = '';
+            if (document.getElementById('input-eloszuro-ev-ig')) document.getElementById('input-eloszuro-ev-ig').value = '';
+            if (document.getElementById('input-eloszuro-author')) document.getElementById('input-eloszuro-author').value = '';
+            if (document.getElementById('input-eloszuro-journal')) document.getElementById('input-eloszuro-journal').value = '';
+            if (document.getElementById('input-eloszuro-institute')) document.getElementById('input-eloszuro-institute').value = '';
+
+            if (keresoMod === 'osszetett') {
+                ujKeresoSor();
+                ujKeresoSor();
+            }
+
+            // 3. Fő találati lista adatainak memóriából törlése
+            aktualisTalalatok = [];
+            megjelenoTalalatok = [];
+            szerverOsszesTalalat = 0;
+            betoltottSzurok = null;
+            ujRekordokDatumTol = null;
+            document.getElementById('fajl-feltolto').value = '';
+
+            // 4. Fő UI találati lista és szűrők vizuális törlése
+            document.getElementById('eredmeny').innerHTML = "<p class='alap-uzenet'>Kérjük, adja meg a keresési feltételeket a fenti mezőkben...</p>";
+            document.getElementById('aktiv-szurok-tarolo').style.display = 'none';
+            document.getElementById('aktiv-szurok-lista').innerHTML = '';
+            uresSzurok();
+            document.querySelectorAll('select.mod-valaszto').forEach(sel => sel.value = 'tartalmaz');
+
+            // 5. Hálózatkutató modul teljes vizuális ürítése és elrejtése
+            const talca = document.getElementById('halozati-talca');
+            if (talca) talca.style.display = 'none';
+            const eredmenyDiv = document.getElementById('halozati-eredmeny');
+            if (eredmenyDiv) eredmenyDiv.innerHTML = '';
+
+            // 6. Hálózati gomb és memóriatár visszaállítása
+            const halozatiGomb = document.getElementById('gomb-halozati-elemzes');
+            if (halozatiGomb) {
+                halozatiGomb.disabled = true;
+                halozatiGomb.innerText = "🕸️ Kijelöltek hálózati elemzése";
+            }
+            openAlexCache = {};
+            oaFakeIdCounter = -1;
+
+            // 7. Beemelt előszűrő tokenek frissítése (ürítése) a keresősávban
+            if (typeof frissitBeemeltEloszurok === 'function') {
+                frissitBeemeltEloszurok();
+            }
+        }
+
+        async function szerverKereses() {
+            const kijelzo = document.getElementById('eredmeny');
+            kijelzo.innerHTML = "<p class='töltes-uzenet'>Keresés az MTMT adatbázisában... Kérjük, várjon.</p>";
+
+            let apiCsomagok = [];
+
+            let preFilters = "";
+
+            const processPreFilter = (id, field) => {
+                let elem = document.getElementById('input-eloszuro-' + id);
+                if (!elem) return;
+                let val = elem.value.trim();
+                if (val) {
+                    let tisztaSzo = val.replace(/\*/g, '');
+                    if (field === 'author') {
+                        const match = tisztaSzo.match(/\[(\d+)\]/);
+                        if (match) preFilters += '&cond=authorships.author;eq;' + encodeURIComponent(match[1]);
+                        else preFilters += tisztaSzo.split(/\s+/).map(w => '&cond=authorships.author.label;any;' + encodeURIComponent(w)).join('');
+                    } else if (field === 'journal') {
+                        const matchJ = tisztaSzo.match(/\[J:(\d+)\]/);
+                        const matchS = tisztaSzo.match(/\[S:(\d+)\]/);
+                        if (matchJ) preFilters += '&cond=journal;eq;' + encodeURIComponent(matchJ[1]);
+                        else if (matchS) preFilters += '&cond=series;eq;' + encodeURIComponent(matchS[1]);
+                        else preFilters += tisztaSzo.split(/\s+/).map(w => '&cond=journal.label;any;' + encodeURIComponent(w)).join('');
+                    } else if (field === 'institute') {
+                        const matchI = tisztaSzo.match(/\[I:(\d+)\]/);
+                        if (matchI) preFilters += '&cond=institutes;eq;' + encodeURIComponent(matchI[1]);
+                        else preFilters += tisztaSzo.split(/\s+/).map(w => '&cond=institutes.label;any;' + encodeURIComponent(w)).join('');
+                    }
+                }
+            };
+
+            processPreFilter('author', 'author');
+            processPreFilter('journal', 'journal');
+            processPreFilter('institute', 'institute');
+
+            let evTol = document.getElementById('input-eloszuro-ev-tol') ? document.getElementById('input-eloszuro-ev-tol').value.trim() : "";
+            let evIg = document.getElementById('input-eloszuro-ev-ig') ? document.getElementById('input-eloszuro-ev-ig').value.trim() : "";
+            if (evTol) preFilters += `&cond=publishedYear;ge;${evTol}`;
+            if (evIg) preFilters += `&cond=publishedYear;le;${evIg}`;
+
+            let allapotPre = document.getElementById('input-eloszuro-allapot') ? document.getElementById('input-eloszuro-allapot').value : "mind";
+            if (allapotPre === "forras") preFilters += `&cond=core;eq;true`;
+            else if (allapotPre === "idezo") preFilters += `&cond=citation;eq;true`;
+
+            if (keresoMod === 'egyszeru') {
+                const beirtSzoveg = document.getElementById('keresoszoveg').value.trim();
+                const okosKereses = okosKeresoFeldolgozo(beirtSzoveg);
+                let url = 'https://m2.mtmt.hu/api/publication/?size=' + LETOLTESI_LIMIT + '&format=json';
+
+                if (okosKereses.tartalmazza.length > 0) {
+                    okosKereses.tartalmazza.forEach(szo => {
+                        let tisztaSzo = szo.replace(/\*/g, '');
+                        url += '&cond=label;any;' + encodeURIComponent(tisztaSzo);
+                    });
+                }
+                apiCsomagok.push(url + preFilters);
+            }
+            else if (keresoMod === 'osszetett') {
+                let blokkok = getOsszetettFeltetelek();
+                if (blokkok.length === 0 && preFilters === "") {
+                    kijelzo.innerHTML = "<p>Kérjük, adjon meg legalább egy keresési feltételt vagy előszűrőt!</p>";
+                    return;
+                }
+                let kombinaciok = generaljKombinaciokat(blokkok);
+
+                if (kombinaciok.length === 0) {
+                    apiCsomagok.push('https://m2.mtmt.hu/api/publication/?size=' + LETOLTESI_LIMIT + '&format=json' + preFilters);
+                } else {
+                    kombinaciok.forEach(kombinacio => {
+                        let url = 'https://m2.mtmt.hu/api/publication/?size=' + LETOLTESI_LIMIT + '&format=json';
+                        kombinacio.forEach(feltetel => {
+                            let tisztaSzo = feltetel.szo.replace(/\*/g, '');
+                            if (feltetel.mezo === 'author') {
+                                const match = tisztaSzo.match(/\[(\d+)\]/);
+                                const mtid = match ? match[1] : tisztaSzo;
+                                url += '&cond=authorships.author;eq;' + encodeURIComponent(mtid);
+                            } else if (feltetel.mezo === 'journal') {
+                                const matchJ = tisztaSzo.match(/\[J:(\d+)\]/);
+                                const matchS = tisztaSzo.match(/\[S:(\d+)\]/);
+                                if (matchJ) {
+                                    url += '&cond=journal;eq;' + encodeURIComponent(matchJ[1]);
+                                } else if (matchS) {
+                                    url += '&cond=series;eq;' + encodeURIComponent(matchS[1]);
+                                } else {
+                                    url += '&cond=journal.label;any;' + encodeURIComponent(tisztaSzo);
+                                }
+                            } else if (feltetel.mezo === 'institute') {
+                                const matchI = tisztaSzo.match(/\[I:(\d+)\]/);
+                                if (matchI) {
+                                    url += '&cond=institutes;eq;' + encodeURIComponent(matchI[1]);
+                                } else {
+                                    url += '&cond=institutes.label;any;' + encodeURIComponent(tisztaSzo);
+                                }
+                            } else {
+                                url += '&cond=label;any;' + encodeURIComponent(tisztaSzo);
+                            }
+                        });
+                        apiCsomagok.push(url + preFilters);
+                    });
+                }
+            }
+
+            try {
+                let promises = apiCsomagok.map(u => fetch(u).then(r => r.json()));
+                let valaszok = await Promise.all(promises);
+
+                let allItems = [];
+                let allMtid = new Set();
+                let becsultOsszes = 0;
+
+                valaszok.forEach(adat => {
+                    if (adat && adat.content) {
+                        becsultOsszes += adat.paging ? adat.paging.totalElements : adat.content.length;
+                        adat.content.forEach(pub => {
+                            if (!allMtid.has(pub.mtid)) {
+                                allMtid.add(pub.mtid);
+                                allItems.push(pub);
+                            }
+                        });
+                    }
+                });
+
+                if (allItems.length > 0) {
+                    aktualisTalalatok = allItems;
+                    szerverOsszesTalalat = keresoMod === 'osszetett' ? becsultOsszes : (valaszok[0].paging ? valaszok[0].paging.totalElements : allItems.length);
+
+                    szurokEpitese(aktualisTalalatok);
+
+                    if (betoltottSzurok) {
+                        szurokVisszaallitasa(betoltottSzurok);
+                        betoltottSzurok = null;
+                    }
+
+                    kliensSzures();
+                } else {
+                    aktualisTalalatok = [];
+                    megjelenoTalalatok = [];
+                    szerverOsszesTalalat = 0;
+                    kijelzo.innerHTML = "<p>Nincs találat.</p>";
+                    uresSzurok();
+                }
+            } catch (hiba) {
+                kijelzo.innerHTML = "<p class='hiba-uzenet'>Hiba történt: " + hiba + "</p>";
+                console.error("API Hiba:", hiba);
+                uresSzurok();
+            }
+        }
+
+        function szurokEpitese(adatok) {
+            let evek = new Set();
+            let allapotok = new Set();
+            let jellegek = new Map();
+            let tipusok = new Map();
+            let besorolasok = new Map();
+            let nyelvek = new Set();
+
+            adatok.forEach(pub => {
+                if (pub.publishedYear) evek.add(pub.publishedYear);
+                allapotok.add(getPubAllapot(pub));
+
+                if (pub.category && pub.category.label) {
+                    let sorszam = pub.category.listPosition || 999;
+                    jellegek.set(pub.category.label, sorszam);
+                }
+                if (pub.type && pub.type.label) {
+                    let sorszam = pub.type.listPosition || 999;
+                    tipusok.set(pub.type.label, sorszam);
+                }
+                if (pub.subType && pub.subType.label) {
+                    let sorszam = pub.subType.listPosition || 999;
+                    besorolasok.set(pub.subType.label, sorszam);
+                }
+                if (pub.languages && pub.languages.length > 0) nyelvek.add(pub.languages[0].label);
+            });
+
+            const generaloRendezve = (listaId, terKep, classNev) => {
+                let rendezettTomb = Array.from(terKep.entries()).sort((a, b) => a[1] - b[1]);
+                document.getElementById(listaId).innerHTML = rendezettTomb.map(elem =>
+                    `<label><input type="checkbox" class="${classNev}" value="${elem[0]}" onchange="kliensSzures()"> ${elem[0]}</label><br>`
+                ).join('');
+            };
+
+            document.getElementById('ev-lista').innerHTML = Array.from(evek).sort().reverse().map(ev =>
+                `<label><input type="checkbox" class="ev-szuro" value="${ev}" onchange="kliensSzures()"> ${ev}</label><br>`
+            ).join('');
+
+            document.getElementById('allapot-lista').innerHTML = Array.from(allapotok).sort().map(allapot =>
+                `<label><input type="checkbox" class="allapot-szuro" value="${allapot}" onchange="kliensSzures()"> ${allapot}</label><br>`
+            ).join('');
+
+            document.getElementById('nyelv-lista').innerHTML = Array.from(nyelvek).sort().map(nyelv =>
+                `<label><input type="checkbox" class="nyelv-szuro" value="${nyelv}" onchange="kliensSzures()"> ${nyelv}</label><br>`
+            ).join('');
+
+            generaloRendezve('jelleg-lista', jellegek, 'jelleg-szuro');
+            generaloRendezve('tipus-lista', tipusok, 'tipus-szuro');
+            generaloRendezve('besorolas-lista', besorolasok, 'besorolas-szuro');
+        }
+
+        function keresesMentes() {
+            const mentesAdat = {
+                datum: new Date().toISOString(),
+                keresoMod: keresoMod,
+                keresoszoveg: document.getElementById('keresoszoveg').value.trim(),
+                osszetettBlokkok: keresoMod === 'osszetett' ? getOsszetettFeltetelek() : [],
+                osszetettKizarva: document.getElementById('osszetett-kizarva') ? document.getElementById('osszetett-kizarva').value.trim() : "",
+                eloszuroAllapot: document.getElementById('input-eloszuro-allapot') ? document.getElementById('input-eloszuro-allapot').value : "mind",
+                eloszuroEvTol: document.getElementById('input-eloszuro-ev-tol') ? document.getElementById('input-eloszuro-ev-tol').value : "",
+                eloszuroEvIg: document.getElementById('input-eloszuro-ev-ig') ? document.getElementById('input-eloszuro-ev-ig').value : "",
+                eloszuroAuthor: document.getElementById('input-eloszuro-author') ? document.getElementById('input-eloszuro-author').value : "",
+                eloszuroJournal: document.getElementById('input-eloszuro-journal') ? document.getElementById('input-eloszuro-journal').value : "",
+                eloszuroInstitute: document.getElementById('input-eloszuro-institute') ? document.getElementById('input-eloszuro-institute').value : "",
+                szurok: {
+                    evek: Array.from(document.querySelectorAll('.ev-szuro:checked')).map(cb => cb.value),
+                    evMod: document.getElementById('ev-mod').value,
+                    allapotok: Array.from(document.querySelectorAll('.allapot-szuro:checked')).map(cb => cb.value),
+                    allapotMod: document.getElementById('allapot-mod').value,
+                    jellegek: Array.from(document.querySelectorAll('.jelleg-szuro:checked')).map(cb => cb.value),
+                    jellegMod: document.getElementById('jelleg-mod').value,
+                    tipusok: Array.from(document.querySelectorAll('.tipus-szuro:checked')).map(cb => cb.value),
+                    tipusMod: document.getElementById('tipus-mod').value,
+                    besorolasok: Array.from(document.querySelectorAll('.besorolas-szuro:checked')).map(cb => cb.value),
+                    besorolasMod: document.getElementById('besorolas-mod').value,
+                    nyelvek: Array.from(document.querySelectorAll('.nyelv-szuro:checked')).map(cb => cb.value),
+                    nyelvMod: document.getElementById('nyelv-mod').value
+                }
+            };
+
+            const blob = new Blob([JSON.stringify(mentesAdat, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+
+            const datumNev = new Date().toISOString().split('T')[0];
+            link.download = `mtmt_kereses_${datumNev}.json`;
+            link.click();
+        }
+
+        function keresesBetoltese(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                try {
+                    const adat = JSON.parse(e.target.result);
+
+                    let betoltendoMod = adat.keresoMod || 'egyszeru';
+                    valtasKeresoMod(betoltendoMod);
+
+                    if (document.getElementById('input-eloszuro-allapot')) document.getElementById('input-eloszuro-allapot').value = adat.eloszuroAllapot || "mind";
+                    if (document.getElementById('input-eloszuro-ev-tol')) document.getElementById('input-eloszuro-ev-tol').value = adat.eloszuroEvTol || "";
+                    if (document.getElementById('input-eloszuro-ev-ig')) document.getElementById('input-eloszuro-ev-ig').value = adat.eloszuroEvIg || "";
+                    if (document.getElementById('input-eloszuro-author')) document.getElementById('input-eloszuro-author').value = adat.eloszuroAuthor || "";
+                    if (document.getElementById('input-eloszuro-journal')) document.getElementById('input-eloszuro-journal').value = adat.eloszuroJournal || "";
+                    if (document.getElementById('input-eloszuro-institute')) document.getElementById('input-eloszuro-institute').value = adat.eloszuroInstitute || "";
+
+                    if (typeof frissitBeemeltEloszurok === 'function') {
+                        frissitBeemeltEloszurok();
+                    }
+
+                    if (betoltendoMod === 'egyszeru') {
+                        document.getElementById('keresoszoveg').value = adat.keresoszoveg || "";
+                    } else if (betoltendoMod === 'osszetett') {
+                        const tarolo = document.getElementById('osszetett-sorok-tarolo');
+                        tarolo.innerHTML = '';
+                        if (adat.osszetettBlokkok && adat.osszetettBlokkok.length > 0) {
+                            adat.osszetettBlokkok.forEach(blokk => {
+                                if (typeof blokk[0] === 'object') {
+                                    let szoveg = blokk.map(b => b.szo).join(', ');
+                                    let mezo = blokk[0].mezo;
+                                    ujKeresoSor(szoveg, mezo);
+                                } else {
+                                    ujKeresoSor(blokk.join(', '), "label");
+                                }
+                            });
+                        } else {
+                            ujKeresoSor();
+                        }
+                        if (document.getElementById('osszetett-kizarva')) {
+                            document.getElementById('osszetett-kizarva').value = adat.osszetettKizarva || "";
+                        }
+                    }
+
+                    ujRekordokDatumTol = null;
+                    if (adat.datum) {
+                        const mentesDatum = new Date(adat.datum);
+                        const szuresiDatum = new Date(mentesDatum);
+                        szuresiDatum.setDate(szuresiDatum.getDate() - 1);
+
+                        if (confirm(`Ezt a keresést ekkor mentette el: ${mentesDatum.toLocaleDateString('hu-HU')}.\n\nSzeretné, ha a rendszer CSAK azokat az ÚJ rekordokat mutatná, amelyeket azóta rögzítettek?`)) {
+                            ujRekordokDatumTol = szuresiDatum;
+                        }
+                    }
+
+                    betoltottSzurok = adat.szurok;
+                    szerverKereses();
+
+                } catch (err) {
+                    alert("Hiba a fájl beolvasásakor. Biztos benne, hogy megfelelő JSON fájlt választott ki?");
+                }
+                document.getElementById('fajl-feltolto').value = "";
+            };
+            reader.readAsText(file);
+        }
+
+        function szurokVisszaallitasa(szurok) {
+            const pipaBeallit = (osztaly, ertekek) => {
+                document.querySelectorAll('.' + osztaly).forEach(cb => {
+                    if (ertekek && ertekek.includes(cb.value)) cb.checked = true;
+                });
+            };
+
+            if (szurok.evMod) document.getElementById('ev-mod').value = szurok.evMod;
+            pipaBeallit('ev-szuro', szurok.evek);
+
+            if (szurok.allapotMod) document.getElementById('allapot-mod').value = szurok.allapotMod;
+            pipaBeallit('allapot-szuro', szurok.allapotok);
+
+            if (szurok.jellegMod) document.getElementById('jelleg-mod').value = szurok.jellegMod;
+            pipaBeallit('jelleg-szuro', szurok.jellegek);
+
+            if (szurok.tipusMod) document.getElementById('tipus-mod').value = szurok.tipusMod;
+            pipaBeallit('tipus-szuro', szurok.tipusok);
+
+            if (szurok.besorolasMod) document.getElementById('besorolas-mod').value = szurok.besorolasMod;
+            pipaBeallit('besorolas-szuro', szurok.besorolasok);
+
+            if (szurok.nyelvMod) document.getElementById('nyelv-mod').value = szurok.nyelvMod;
+            pipaBeallit('nyelv-szuro', szurok.nyelvek);
+        }
+
+        function szuroEllenorzes(pubErtek, kivalasztottErtekek, mod) {
+            if (kivalasztottErtekek.length === 0) return true;
+            let egyezik = kivalasztottErtekek.includes(String(pubErtek));
+            if (mod === 'tartalmaz') return egyezik;
+            if (mod === 'kizar') return !egyezik;
+        }
+
+        function kliensSzures() {
+            const evek = Array.from(document.querySelectorAll('.ev-szuro:checked')).map(cb => cb.value);
+            const allapotok = Array.from(document.querySelectorAll('.allapot-szuro:checked')).map(cb => cb.value);
+            const jellegek = Array.from(document.querySelectorAll('.jelleg-szuro:checked')).map(cb => cb.value);
+            const tipusok = Array.from(document.querySelectorAll('.tipus-szuro:checked')).map(cb => cb.value);
+            const besorolasok = Array.from(document.querySelectorAll('.besorolas-szuro:checked')).map(cb => cb.value);
+            const nyelvek = Array.from(document.querySelectorAll('.nyelv-szuro:checked')).map(cb => cb.value);
+
+            const evMod = document.getElementById('ev-mod').value;
+            const allapotMod = document.getElementById('allapot-mod').value;
+            const jellegMod = document.getElementById('jelleg-mod').value;
+            const tipusMod = document.getElementById('tipus-mod').value;
+            const besorolasMod = document.getElementById('besorolas-mod').value;
+            const nyelvMod = document.getElementById('nyelv-mod').value;
+
+            let aktivFeltetelek = [];
+
+            let okosKereses = { tartalmazza: [], kizarja: [] };
+            let osszetettBlokkok = [];
+            let kizarandoSzavak = [];
+
+            let preAllapot = document.getElementById('input-eloszuro-allapot') ? document.getElementById('input-eloszuro-allapot').value : "mind";
+            if (preAllapot === "forras") aktivFeltetelek.push(`<span class="szuro-cimke" style="background-color:#004481;">📌 Állapot: Csak Forrásközlemény</span>`);
+            if (preAllapot === "idezo") aktivFeltetelek.push(`<span class="szuro-cimke" style="background-color:#004481;">📌 Állapot: Csak Idéző</span>`);
+
+            let preAuthor = document.getElementById('input-eloszuro-author') ? document.getElementById('input-eloszuro-author').value.trim() : "";
+            if (preAuthor) aktivFeltetelek.push(`<span class="szuro-cimke" style="background-color:#004481;">👤 Szerző: ${preAuthor}</span>`);
+
+            let preJournal = document.getElementById('input-eloszuro-journal') ? document.getElementById('input-eloszuro-journal').value.trim() : "";
+            if (preJournal) aktivFeltetelek.push(`<span class="szuro-cimke" style="background-color:#004481;">📚 Folyóirat: ${preJournal}</span>`);
+
+            let preInst = document.getElementById('input-eloszuro-institute') ? document.getElementById('input-eloszuro-institute').value.trim() : "";
+            if (preInst) aktivFeltetelek.push(`<span class="szuro-cimke" style="background-color:#004481;">🏛️ Intézmény: ${preInst}</span>`);
+
+            let evTolVal = document.getElementById('input-eloszuro-ev-tol') ? document.getElementById('input-eloszuro-ev-tol').value.trim() : "";
+            let evIgVal = document.getElementById('input-eloszuro-ev-ig') ? document.getElementById('input-eloszuro-ev-ig').value.trim() : "";
+            if (evTolVal || evIgVal) {
+                let evSzoveg = "";
+                if (evTolVal && evIgVal) evSzoveg = `${evTolVal} - ${evIgVal}`;
+                else if (evTolVal) evSzoveg = `${evTolVal}-től`;
+                else evSzoveg = `${evIgVal}-ig`;
+                aktivFeltetelek.push(`<span class="szuro-cimke" style="background-color:#004481;">📅 Év: ${evSzoveg}</span>`);
+            }
+
+            if (keresoMod === 'egyszeru') {
+                const beirtSzoveg = document.getElementById('keresoszoveg').value.trim();
+                okosKereses = okosKeresoFeldolgozo(beirtSzoveg);
+                if (okosKereses.tartalmazza.length > 0) aktivFeltetelek.push(`<span class="szuro-cimke">Kulcsszó: ${okosKereses.tartalmazza.join(' ÉS ')}</span>`);
+                if (okosKereses.kizarja.length > 0) aktivFeltetelek.push(`<span class="szuro-cimke kizaro">Kizárva: ${okosKereses.kizarja.join(', ')}</span>`);
+            } else if (keresoMod === 'osszetett') {
+                osszetettBlokkok = getOsszetettFeltetelek();
+                osszetettBlokkok.forEach((blokk, i) => {
+                    let szavak = blokk.map(b => {
+                        if (b.mezo === 'author') return `👤 ${b.szo}`;
+                        if (b.mezo === 'journal') return `📚 ${b.szo}`;
+                        if (b.mezo === 'institute') return `🏛️ ${b.szo}`;
+                        return b.szo;
+                    }).join(' VAGY ');
+                    aktivFeltetelek.push(`<span class="szuro-cimke" style="background-color:#17a2b8;">Blokk ${i + 1}: ${szavak}</span>`);
+                });
+
+                let kizarText = document.getElementById('osszetett-kizarva').value;
+                kizarandoSzavak = kizarText.split(',').map(s => s.trim().toLowerCase().replace(/"/g, '')).filter(s => s !== '');
+                if (kizarandoSzavak.length > 0) {
+                    aktivFeltetelek.push(`<span class="szuro-cimke kizaro">Kizárva: ${kizarandoSzavak.join(', ')}</span>`);
+                }
+            }
+
+            const cimkeKeszito = (tomb, mod, nev) => {
+                if (tomb.length > 0) {
+                    let stilusOsztaly = mod === 'kizar' ? 'szuro-cimke kizaro' : 'szuro-cimke';
+                    let modSzoveg = mod === 'kizar' ? 'NEM: ' : '';
+                    aktivFeltetelek.push(`<span class="${stilusOsztaly}">${nev}: ${modSzoveg}${tomb.join(', ')}</span>`);
+                }
+            };
+
+            cimkeKeszito(evek, evMod, 'Év');
+            cimkeKeszito(allapotok, allapotMod, 'Állapot');
+            cimkeKeszito(jellegek, jellegMod, 'Jelleg (célcsoport)');
+            cimkeKeszito(tipusok, tipusMod, 'Típus (űrlap)');
+            cimkeKeszito(besorolasok, besorolasMod, 'Besorolás (dokumentumtípus)');
+            cimkeKeszito(nyelvek, nyelvMod, 'Nyelv');
+
+            if (ujRekordokDatumTol !== null) {
+                aktivFeltetelek.push(`<span class="szuro-cimke" style="background-color: #ff9900; color: #000;">Új feltöltések: ${ujRekordokDatumTol.toLocaleDateString('hu-HU')} óta</span>`);
+            }
+
+            const szuroTarolo = document.getElementById('aktiv-szurok-tarolo');
+            const szuroLista = document.getElementById('aktiv-szurok-lista');
+
+            if (aktivFeltetelek.length > 0) {
+                szuroLista.innerHTML = aktivFeltetelek.join('');
+                szuroTarolo.style.display = 'flex';
+            } else {
+                szuroTarolo.style.display = 'none';
+            }
+
+            const szurtTalalatok = aktualisTalalatok.filter(pub => {
+                let evOk = szuroEllenorzes(pub.publishedYear, evek, evMod);
+                let pubAllapot = getPubAllapot(pub);
+                let allapotOk = szuroEllenorzes(pubAllapot, allapotok, allapotMod);
+                let jellegOk = szuroEllenorzes(pub.category ? pub.category.label : '', jellegek, jellegMod);
+                let tipusOk = szuroEllenorzes(pub.type ? pub.type.label : '', tipusok, tipusMod);
+                let besorolasOk = szuroEllenorzes(pub.subType ? pub.subType.label : '', besorolasok, besorolasMod);
+                let pubNyelv = (pub.languages && pub.languages.length > 0) ? pub.languages[0].label : '';
+                let nyelvOk = szuroEllenorzes(pubNyelv, nyelvek, nyelvMod);
+
+                let letrejovesIdeje = pub.created ? new Date(pub.created) : new Date(0);
+                let ujdonsagOk = ujRekordokDatumTol !== null ? (letrejovesIdeje >= ujRekordokDatumTol) : true;
+
+                let pubSzoveg = (pub.label || pub.title || "").toLowerCase();
+                let szovegOk = true;
+
+                if (keresoMod === 'egyszeru') {
+                    for (let szo of okosKereses.tartalmazza) {
+                        if (!pontosKereses(pubSzoveg, szo)) { szovegOk = false; break; }
+                    }
+                    if (szovegOk) {
+                        for (let szo of okosKereses.kizarja) {
+                            if (pontosKereses(pubSzoveg, szo)) { szovegOk = false; break; }
+                        }
+                    }
+                } else if (keresoMod === 'osszetett') {
+                    for (let blokk of osszetettBlokkok) {
+                        let blokkSzerepel = false;
+                        for (let feltetel of blokk) {
+                            if (feltetel.mezo === 'author') {
+                                const match = feltetel.szo.match(/\[(\d+)\]/);
+                                if (match) {
+                                    const searchMtid = parseInt(match[1]);
+                                    if (pub.authorships && pub.authorships.some(a => a.author && a.author.mtid === searchMtid)) {
+                                        blokkSzerepel = true;
+                                        break;
+                                    }
+                                } else {
+                                    let tisztaKeresoSzo = feltetel.szo.replace(/\s*\[\d+\]\s*/g, '').trim().toLowerCase();
+                                    if (pontosKereses(pubSzoveg, tisztaKeresoSzo)) {
+                                        blokkSzerepel = true;
+                                        break;
+                                    }
+                                }
+                            } else if (feltetel.mezo === 'journal') {
+                                const matchJ = feltetel.szo.match(/\[J:(\d+)\]/);
+                                const matchS = feltetel.szo.match(/\[S:(\d+)\]/);
+                                if (matchJ) {
+                                    if (pub.journal && pub.journal.mtid === parseInt(matchJ[1])) {
+                                        blokkSzerepel = true;
+                                        break;
+                                    }
+                                } else if (matchS) {
+                                    if (pub.series && pub.series.mtid === parseInt(matchS[1])) {
+                                        blokkSzerepel = true;
+                                        break;
+                                    }
+                                } else {
+                                    let tisztaKeresoSzo = feltetel.szo.replace(/\s*\[[JS]:\d+\]\s*/g, '').trim().toLowerCase();
+                                    let pubJournalLabel = pub.journal && pub.journal.label ? pub.journal.label.toLowerCase() : "";
+                                    let pubSeriesLabel = pub.series && pub.series.label ? pub.series.label.toLowerCase() : "";
+
+                                    if (pontosKereses(pubJournalLabel, tisztaKeresoSzo) || pontosKereses(pubSeriesLabel, tisztaKeresoSzo)) {
+                                        blokkSzerepel = true;
+                                        break;
+                                    }
+                                }
+                            } else if (feltetel.mezo === 'institute') {
+                                const matchI = feltetel.szo.match(/\[I:(\d+)\]/);
+                                if (matchI) {
+                                    const searchMtid = parseInt(matchI[1]);
+                                    if (pub.institutes && pub.institutes.some(inst => inst.mtid === searchMtid)) {
+                                        blokkSzerepel = true;
+                                        break;
+                                    } else {
+                                        let tisztaKeresoSzo = feltetel.szo.replace(/\s*\[I:\d+\]\s*/g, '').trim().toLowerCase();
+                                        if (pontosKereses(pubSzoveg, tisztaKeresoSzo)) {
+                                            blokkSzerepel = true;
+                                            break;
+                                        }
+                                    }
+                                } else {
+                                    let tisztaKeresoSzo = feltetel.szo.replace(/\s*\[I:\d+\]\s*/g, '').trim().toLowerCase();
+                                    if (pontosKereses(pubSzoveg, tisztaKeresoSzo)) {
+                                        blokkSzerepel = true;
+                                        break;
+                                    }
+                                }
+                            } else {
+                                if (pontosKereses(pubSzoveg, feltetel.szo)) {
+                                    blokkSzerepel = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (!blokkSzerepel) {
+                            szovegOk = false;
+                            break;
+                        }
+                    }
+                    if (szovegOk) {
+                        for (let kSzo of kizarandoSzavak) {
+                            if (pontosKereses(pubSzoveg, kSzo)) {
+                                szovegOk = false;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                return evOk && allapotOk && jellegOk && tipusOk && besorolasOk && nyelvOk && ujdonsagOk && szovegOk;
+            });
+
+            talalatokMegjelenitese(szurtTalalatok);
+        }
+
+        function osszesSzuroTorlese() {
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            document.querySelectorAll('select.mod-valaszto').forEach(sel => sel.value = 'tartalmaz');
+            ujRekordokDatumTol = null;
+            kliensSzures();
+        }
+
+        function osszesKijelolese() {
+            document.querySelectorAll('.export-kivalaszto').forEach(cb => cb.checked = true);
+        }
+
+        function kijelolesTorlese() {
+            document.querySelectorAll('.export-kivalaszto').forEach(cb => cb.checked = false);
+        }
+
+        function reszletekMutatasa(mtid) {
+            const reszletekDiv = document.getElementById('reszletek-' + mtid);
+            const gomb = document.getElementById('gomb-' + mtid);
+            if (reszletekDiv.style.display === "none") {
+                reszletekDiv.style.display = "block";
+                gomb.innerText = "Részletek elrejtése ▲";
+            } else {
+                reszletekDiv.style.display = "none";
+                gomb.innerText = "Részletek mutatása ▼";
+            }
+        }
+
+        // =========================================================================
+        // HÁLÓZATKUTATÓ MODUL: KIRENDERELÉS MÓDOSÍTÁSA (MTMT + OPENALEX JELZÉS)
+        // =========================================================================
+        function talalatokMegjelenitese(adatok) {
+            megjelenoTalalatok = adatok;
+            const kijelzo = document.getElementById('eredmeny');
+            let kimenetHTML = "";
+
+            if (szerverOsszesTalalat > LETOLTESI_LIMIT) {
+                kimenetHTML += `
+                                            <div style="background-color: #fff3cd; color: #856404; padding: 12px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #ffeeba; font-size: 14px;">
+                                                <strong>⚠️ Figyelem: Részleges találati lista!</strong> 
+                                                A megadott feltételekre több mint <strong>${LETOLTESI_LIMIT}</strong> találat érkezett a szerverről. A megjelenített eredmények és szűrők csak ezen a letöltött halmazon belül érvényesek. Érdemes pontosítani a szavakat!
+                                            </div>`;
+            }
+
+            kimenetHTML += `
+                                        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid #ddd; padding-bottom: 10px; margin-bottom: 15px;">
+                                            <p style="margin:0;">Jelenleg <strong>${adatok.length}</strong> elem látható a szűrők alapján.</p>
+                                            <div>
+                                                <button onclick="osszesKijelolese()" class="kicsi-gomb" style="margin-right: 5px;">Összes kijelölése</button>
+                                                <button onclick="kijelolesTorlese()" class="kicsi-gomb">Kijelölés törlése</button>
+                                            </div>
+                                        </div>`;
+
+            adatok.forEach(pub => {
+                let cim = pub.title || "Cím nélküli dokumentum";
+                let ev = pub.publishedYear || "Évszám hiányzik";
+                let teljesHivatkozas = pub.label || "";
+                let jelleg = pub.category ? pub.category.label : 'Ismeretlen jelleg';
+                let tipus = pub.type ? pub.type.label : 'Ismeretlen típus';
+                let besorolas = pub.subType ? pub.subType.label : 'Ismeretlen besorolás';
+
+                let allapot = getPubAllapot(pub);
+
+                let folyoiratNev = "Nem megadott / Nem folyóiratcikk";
+                let issnSzoveg = "";
+
+                if (pub.journal) {
+                    folyoiratNev = pub.journal.title || (pub.journal.label ? pub.journal.label.replace(/\s?[0-9]{4}-[0-9]{3}[0-9xX]/g, '').trim() : "Ismeretlen folyóirat");
+                    let pI = pub.journal.pIssn || pub.journal.pissn;
+                    let eI = pub.journal.eIssn || pub.journal.eissn;
+                    let issnTomb = [];
+                    if (pI) issnTomb.push("P-ISSN: " + pI);
+                    if (eI) issnTomb.push("E-ISSN: " + eI);
+                    if (issnTomb.length > 0) issnSzoveg = " <i>(" + issnTomb.join(", ") + ")</i>";
+                }
+
+                let szerzok = [];
+                if (pub.authorships) {
+                    pub.authorships.forEach(a => {
+                        if (a.author && a.author.label) szerzok.push(a.author.label);
+                        else if (a.familyName) szerzok.push(a.familyName + " " + (a.givenName || ""));
+                    });
+                }
+                let szerzoSzoveg = szerzok.length > 0 ? szerzok.join('; ') : "Nincs megadott szerző";
+
+                let doi = "Nincs DOI";
+                let oaLinkStr = "";
+
+                // DOI és OpenAlex link kinyerése a kártyákhoz
+                if (pub.identifiers) {
+                    let doiObj = pub.identifiers.find(id => id.source && id.source.label === "DOI");
+                    if (doiObj) doi = doiObj.realUrl ? `<a href="${doiObj.realUrl}" target="_blank" style="color: #004481; font-weight: bold;">${doiObj.idValue}</a>` : doiObj.idValue;
+
+                    let oaObj = pub.identifiers.find(id => id.source && id.source.label === "OpenAlex");
+                    if (oaObj) {
+                        oaLinkStr = ` <span style="color:#ccc; margin: 0 8px;">|</span> 🔗 <strong>OpenAlex:</strong> <a href="${oaObj.realUrl || 'https://openalex.org/' + oaObj.idValue}" target="_blank" style="color: #e83e8c; font-weight: bold;">${oaObj.idValue}</a>`;
+                    }
+                }
+
+                let letrehozvaSzoveg = pub.created ? new Date(pub.created).toLocaleDateString('hu-HU') : "Ismeretlen";
+
+                kimenetHTML += `
+                    <div class="publikacio-kartya" style="border: 1px solid #eee; padding: 15px; margin-bottom: 15px; border-radius: 5px; background: #fff;">
+                        <div style="display: flex; gap: 15px; align-items: flex-start;">
+                            
+                            <input type="checkbox" class="export-kivalaszto" value="${pub.mtid}" style="margin-top: 5px; transform: scale(1.2); cursor: pointer;" title="Kijelölés exportáláshoz">
+                            
+                            <div style="flex-grow: 1;">
+                                ${pub.isOpenAlex ? `<div style="margin-bottom: 8px;"><span style="background-color: #e83e8c; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase;">🌐 Forrás: OpenAlex</span></div>` : ''}
+                                
+                                <h3 style="margin-top: 0; color: #004481; font-size: 18px; margin-bottom: 5px;">${cim} <span style="color:#d9534f;">(${ev})</span></h3>
+                                <p style="font-size: 14px; color: #555; margin-top: 0; margin-bottom: 8px;">${teljesHivatkozas}</p>
+                                
+                                ${(doi !== "Nincs DOI" || oaLinkStr !== "") ? `<div style="font-size: 13px; margin-bottom: 10px; background-color: #f0f7ff; display: inline-block; padding: 4px 8px; border-radius: 4px; border: 1px solid #cce5ff;">🔗 <strong>DOI:</strong> ${doi}${oaLinkStr}</div>` : ''}
+
+                                <div style="margin-top: 10px; font-size: 12px; color: #999; display: flex; justify-content: space-between; align-items: center;">
+                                    <span>Jelleg (célcsoport): <strong>${jelleg}</strong> | Állapot: <strong style="color:#17a2b8;">${allapot}</strong> | MTMT ID: ${pub.isOpenAlex ? 'N/A' : pub.mtid}</span>
+                                    <button id="gomb-${pub.mtid}" onclick="reszletekMutatasa('${pub.mtid}')" style="background:none; border:none; color:#004481; cursor:pointer; font-weight:bold; font-size:12px;">Részletek mutatása ▼</button>
+                                </div>
+                                
+                                <div id="reszletek-${pub.mtid}" style="display: none; margin-top: 15px; padding: 10px; background-color: #f9f9fa; border-left: 3px solid #004481; font-size: 13px;">
+                                    <p style="margin: 0 0 5px 0;"><strong>Típus (űrlap) / Besorolás (dokumentumtípus):</strong> ${tipus} / ${besorolas}</p>
+                                    <p style="margin: 0 0 5px 0;"><strong>Szerző(k):</strong> ${szerzoSzoveg}</p>
+                                    <p style="margin: 0 0 5px 0;"><strong>Megjelenés helye:</strong> ${folyoiratNev}${issnSzoveg}</p>
+                                    <p style="margin: 0 0 5px 0;"><strong>Rögzítés dátuma:</strong> ${letrehozvaSzoveg}</p>
+                                    <p style="margin: 0;">
+                                        ${pub.isOpenAlex
+                        ? `<a href="https://openalex.org/${pub.identifiers.find(id => id.source.label === 'OpenAlex').idValue}" target="_blank" style="color: #e83e8c;">Eredeti OpenAlex Adatlap megnyitása</a>`
+                        : `<a href="https://m2.mtmt.hu/api/publication/${pub.mtid}" target="_blank" style="color: #004481;">Eredeti MTMT API Adatlap megnyitása</a>`}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            kijelzo.innerHTML = kimenetHTML;
+        }
+
+        // =========================================================================
+        // KOMBINALÁLT EXPORTÁLÁS (GOMB + SELECT)
+        // =========================================================================
+        function kombinaltExportalas() {
+            const sel = document.getElementById('idezet-stilus').value;
+            if (sel.startsWith('html-')) {
+                exportalas('html', sel.replace('html-', ''));
+            } else {
+                exportalas(sel, null);
+            }
+        }
+
+        function exportalas(tipus, htmlStilusOverride) {
+            const kijeloltek = Array.from(document.querySelectorAll('.export-kivalaszto:checked')).map(cb => parseInt(cb.value));
+
+            let exportalandoAdatok = megjelenoTalalatok;
+            if (kijeloltek.length > 0) {
+                exportalandoAdatok = megjelenoTalalatok.filter(pub => kijeloltek.includes(pub.mtid));
+            }
+
+            if (exportalandoAdatok.length === 0) {
+                alert("Nincs mit exportálni!");
+                return;
+            }
+
+            let tartalom = "";
+            let fajlnev = (kijeloltek.length > 0 ? "kivalasztott" : "osszes") + "_mtmt_kereses." + tipus;
+            let mimeTipus = 'text/plain;charset=utf-8';
+
+            if (tipus === 'html') {
+                mimeTipus = 'text/html;charset=utf-8';
+                const stilus = htmlStilusOverride || document.getElementById('idezet-stilus').value.replace('html-', '');
+                const stilusNevek = { apa: "APA", ieee: "IEEE", mla: "MLA", chicago: "Chicago" };
+
+                tartalom = `<!DOCTYPE html>\n<html lang="hu">\n<head>\n<meta charset="UTF-8">\n<title>Exportált irodalomjegyzék</title>\n`;
+                tartalom += `<style>body { font-family: 'Times New Roman', Times, serif; padding: 30px; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; } .bib-item { margin-bottom: 20px; padding-left: 30px; text-indent: -30px; }</style>\n`;
+                tartalom += `</head>\n<body>\n<h2>Irodalomjegyzék (${stilusNevek[stilus]})</h2>\n<div class="irodalomjegyzek">\n`;
+
+                exportalandoAdatok.forEach((pub, index) => {
+                    let szerzokAPA = [];
+                    let szerzokIEEE = [];
+                    let szerzokHagyomanyos = [];
+
+                    if (pub.authorships) {
+                        pub.authorships.forEach(a => {
+                            let vNev = a.familyName || (a.author && a.author.label ? a.author.label.split(' ')[0] : "");
+                            let kNev = a.givenName || (a.author && a.author.label && a.author.label.split(' ').length > 1 ? a.author.label.split(' ')[1] : "");
+                            let kNevInit = kNev ? kNev.charAt(0) + "." : "";
+
+                            if (vNev) {
+                                szerzokAPA.push(`${vNev}, ${kNevInit}`);
+                                szerzokIEEE.push(`${kNevInit} ${vNev}`);
+                                szerzokHagyomanyos.push(`${vNev}, ${kNev}`);
+                            }
+                        });
+                    }
+
+                    let cim = pub.title || "Ismeretlen cím";
+                    let ev = pub.publishedYear || "é. n.";
+                    let folyoirat = pub.journal ? (pub.journal.title || pub.journal.label.replace(/\s?[0-9]{4}-[0-9]{3}[0-9xX]/g, '').trim()) : "";
+                    let vol = pub.volume ? pub.volume : "";
+                    let iss = pub.issue ? pub.issue : "";
+                    let pages = (pub.firstPage && pub.lastPage) ? `${pub.firstPage}-${pub.lastPage}` : (pub.firstPage || "");
+
+                    let htmlSor = "";
+
+                    if (stilus === 'apa') {
+                        let szSzoveg = szerzokAPA.length > 0 ? szerzokAPA.join(', ') : "Ismeretlen szerző";
+                        htmlSor = `${szSzoveg} (${ev}). ${cim}. <i>${folyoirat}</i>`;
+                        if (vol) htmlSor += `, <i>${vol}</i>`;
+                        if (iss) htmlSor += `(${iss})`;
+                        if (pages) htmlSor += `, ${pages}.`;
+                    } else if (stilus === 'ieee') {
+                        let szSzoveg = szerzokIEEE.length > 0 ? szerzokIEEE.join(' and ') : "Ismeretlen szerző";
+                        htmlSor = `<span style="display:inline-block; width: 30px; margin-left: -30px;">[${index + 1}]</span>${szSzoveg}, "${cim}," <i>${folyoirat}</i>`;
+                        if (vol) htmlSor += `, vol. ${vol}`;
+                        if (iss) htmlSor += `, no. ${iss}`;
+                        if (pages) htmlSor += `, pp. ${pages}`;
+                        htmlSor += `, ${ev}.`;
+                    } else if (stilus === 'mla') {
+                        let szSzoveg = szerzokHagyomanyos.length > 0 ? szerzokHagyomanyos.join(', ') : "Ismeretlen szerző";
+                        htmlSor = `${szSzoveg}. "${cim}." <i>${folyoirat}</i>`;
+                        if (vol) htmlSor += `, vol. ${vol}`;
+                        if (iss) htmlSor += `, no. ${iss}`;
+                        htmlSor += `, ${ev}`;
+                        if (pages) htmlSor += `, pp. ${pages}.`;
+                    } else if (stilus === 'chicago') {
+                        let szSzoveg = szerzokHagyomanyos.length > 0 ? szerzokHagyomanyos.join(', ') : "Ismeretlen szerző";
+                        htmlSor = `${szSzoveg}. "${cim}." <i>${folyoirat}</i> ${vol ? vol : ''}`;
+                        if (iss) htmlSor += `, no. ${iss}`;
+                        htmlSor += ` (${ev})`;
+                        if (pages) htmlSor += `: ${pages}.`;
+                    }
+
+                    tartalom += `<div class="bib-item">${htmlSor}</div>\n`;
+                });
+
+                tartalom += `</div>\n</body>\n</html>`;
+            }
+            else if (tipus === 'ris') {
+                exportalandoAdatok.forEach(pub => {
+                    let risTipus = "JOUR";
+                    if (pub.type && pub.type.label && pub.type.label.includes("Könyv")) risTipus = "BOOK";
+                    if (pub.type && pub.type.label && pub.type.label.includes("Konferencia")) risTipus = "CPAPER";
+
+                    tartalom += `TY  - ${risTipus}\n`;
+                    tartalom += `TI  - ${pub.title || "Ismeretlen cím"}\n`;
+
+                    if (pub.authorships) {
+                        pub.authorships.forEach(a => {
+                            if (a.familyName) tartalom += `AU  - ${a.familyName}, ${a.givenName || ""}\n`;
+                            else if (a.author && a.author.label) tartalom += `AU  - ${a.author.label}\n`;
+                        });
+                    }
+
+                    tartalom += `PY  - ${pub.publishedYear || ""}\n`;
+
+                    if (pub.journal) {
+                        let jTitle = pub.journal.title || (pub.journal.label ? pub.journal.label.replace(/\s?[0-9]{4}-[0-9]{3}[0-9xX]/g, '').trim() : "");
+                        if (jTitle) tartalom += `JO  - ${jTitle}\n`;
+                        let pI = pub.journal.pIssn || pub.journal.pissn;
+                        let eI = pub.journal.eIssn || pub.journal.eissn;
+                        if (pI) tartalom += `SN  - ${pI}\n`;
+                        if (eI) tartalom += `SN  - ${eI}\n`;
+                    }
+
+                    if (pub.volume) tartalom += `VL  - ${pub.volume}\n`;
+                    if (pub.issue) tartalom += `IS  - ${pub.issue}\n`;
+
+                    if (pub.firstPage) {
+                        tartalom += `SP  - ${pub.firstPage}\n`;
+                    } else if (pub.internalId) {
+                        tartalom += `SP  - ${pub.internalId}\n`;
+                        tartalom += `M1  - Article Number: ${pub.internalId}\n`;
+                    }
+                    if (pub.lastPage) tartalom += `EP  - ${pub.lastPage}\n`;
+
+                    if (pub.identifiers) {
+                        let doiObj = pub.identifiers.find(id => id.source && id.source.label === "DOI");
+                        if (doiObj) tartalom += `DO  - ${doiObj.idValue}\n`;
+                    }
+
+                    tartalom += `UR  - https://m2.mtmt.hu/api/publication/${pub.mtid}\n`;
+                    tartalom += `ER  - \n\n`;
+                });
+            }
+            else if (tipus === 'bibtex') {
+                exportalandoAdatok.forEach(pub => {
+                    let id = "mtmt_" + pub.mtid;
+                    let bibTipus = "article";
+                    if (pub.type && pub.type.label && pub.type.label.includes("Könyv")) bibTipus = "book";
+
+                    tartalom += `@${bibTipus}{${id},\n`;
+                    tartalom += `  title = {{${pub.title || "Ismeretlen cím"}}},\n`;
+
+                    let bibSzerzok = [];
+                    if (pub.authorships) {
+                        pub.authorships.forEach(a => {
+                            if (a.familyName) bibSzerzok.push(`${a.familyName}, ${a.givenName || ""}`);
+                            else if (a.author && a.author.label) bibSzerzok.push(a.author.label);
+                        });
+                    }
+                    if (bibSzerzok.length > 0) tartalom += `  author = {${bibSzerzok.join(' and ')}},\n`;
+
+                    if (pub.journal) {
+                        let jTitle = pub.journal.title || (pub.journal.label ? pub.journal.label.replace(/\s?[0-9]{4}-[0-9]{3}[0-9xX]/g, '').trim() : "");
+                        if (jTitle) tartalom += `  journal = {{${jTitle}}},\n`;
+                        let pI = pub.journal.pIssn || pub.journal.pissn;
+                        let eI = pub.journal.eIssn || pub.journal.eissn;
+                        if (pI) tartalom += `  issn = {${pI}},\n`;
+                        if (eI) tartalom += `  eissn = {${eI}},\n`;
+                    }
+
+                    tartalom += `  year = {${pub.publishedYear || ""}},\n`;
+                    if (pub.volume) tartalom += `  volume = {${pub.volume}},\n`;
+                    if (pub.issue) tartalom += `  number = {${pub.issue}},\n`;
+                    if (pub.firstPage && pub.lastPage) tartalom += `  pages = {${pub.firstPage}--${pub.lastPage}},\n`;
+
+                    if (pub.internalId) {
+                        tartalom += `  artno = {${pub.internalId}},\n`;
+                    }
+
+                    if (pub.identifiers) {
+                        let doiObj = pub.identifiers.find(id => id.source && id.source.label === "DOI");
+                        if (doiObj) tartalom += `  doi = {${doiObj.idValue}},\n`;
+                    }
+
+                    tartalom += `  url = {https://m2.mtmt.hu/api/publication/${pub.mtid}}\n`;
+                    tartalom += `}\n\n`;
+                });
+            }
+            else if (tipus === 'csl') {
+                let cslArray = exportalandoAdatok.map(pub => {
+                    let cslItem = {
+                        id: "mtmt_" + pub.mtid,
+                        type: "article-journal",
+                        title: pub.title || "Ismeretlen cím"
+                    };
+
+                    if (pub.type && pub.type.label) {
+                        let tl = pub.type.label.toLowerCase();
+                        if (tl.includes("könyv") && !tl.includes("fejezet")) cslItem.type = "book";
+                        else if (tl.includes("konferencia")) cslItem.type = "paper-conference";
+                        else if (tl.includes("fejezet") || tl.includes("részlet")) cslItem.type = "chapter";
+                    }
+
+                    if (pub.authorships) {
+                        cslItem.author = [];
+                        let noteAffiliations = [];
+
+                        pub.authorships.forEach(a => {
+                            let authorObj = {};
+                            let authorName = "";
+
+                            if (a.familyName) {
+                                authorObj.family = a.familyName;
+                                authorObj.given = a.givenName || "";
+                                authorName = `${a.familyName} ${a.givenName || ""}`.trim();
+                            } else if (a.author && a.author.label) {
+                                authorObj.literal = a.author.label;
+                                authorName = a.author.label;
+                            } else if (a.label) {
+                                authorObj.literal = a.label.split('[')[0].trim();
+                                authorName = authorObj.literal;
+                            }
+
+                            let affiliation = "";
+                            if (a.organizations && a.organizations.length > 0) {
+                                affiliation = a.organizations.map(o => o.label || o.name).join(', ');
+                            } else if (a.institutes && a.institutes.length > 0) {
+                                affiliation = a.institutes.map(i => i.label || i.name).join(', ');
+                            } else if (a.label && a.label.includes(']')) {
+                                let parts = a.label.split(']');
+                                if (parts.length > 1 && parts[parts.length - 1].trim().length > 0) {
+                                    affiliation = parts[parts.length - 1].trim();
+                                }
+                            }
+
+                            if (affiliation) {
+                                authorObj.affiliation = affiliation;
+                                if (authorName) noteAffiliations.push(`${authorName}: ${affiliation}`);
+                            }
+
+                            if (Object.keys(authorObj).length > 0) {
+                                cslItem.author.push(authorObj);
+                            }
+                        });
+
+                        if (noteAffiliations.length > 0) {
+                            cslItem.note = "MTMT Intézményi affiliációk:\n" + noteAffiliations.join("\n");
+                        } else if (pub.directInstitutesForSort) {
+                            cslItem.note = "MTMT Intézményi affiliációk:\n" + pub.directInstitutesForSort;
+                        }
+                    }
+
+                    if (pub.publishedYear) {
+                        cslItem.issued = { "date-parts": [[parseInt(pub.publishedYear)]] };
+                    }
+
+                    if (pub.journal) {
+                        let jTitle = pub.journal.title || (pub.journal.label ? pub.journal.label.replace(/\s?[0-9]{4}-[0-9]{3}[0-9xX]/g, '').trim() : "");
+                        if (jTitle) cslItem["container-title"] = jTitle;
+
+                        let pI = pub.journal.pIssn || pub.journal.pissn;
+                        let eI = pub.journal.eIssn || pub.journal.eissn;
+                        if (pI) cslItem.ISSN = pI;
+                        if (eI && !pI) cslItem.ISSN = eI;
+                    }
+
+                    if (pub.volume) cslItem.volume = pub.volume;
+                    if (pub.issue) cslItem.issue = pub.issue;
+
+                    if (pub.firstPage) {
+                        cslItem.page = pub.firstPage;
+                        if (pub.lastPage) cslItem.page += `-${pub.lastPage}`;
+                    } else if (pub.internalId) {
+                        cslItem.number = pub.internalId;
+                    }
+
+                    if (pub.identifiers) {
+                        let doiObj = pub.identifiers.find(id => id.source && id.source.label === "DOI");
+                        if (doiObj) cslItem.DOI = doiObj.idValue;
+                    }
+
+                    cslItem.URL = `https://m2.mtmt.hu/api/publication/${pub.mtid}`;
+
+                    return cslItem;
+                });
+
+                tartalom = JSON.stringify(cslArray, null, 2);
+                mimeTipus = 'application/json;charset=utf-8';
+                fajlnev = (kijeloltek.length > 0 ? "kivalasztott" : "osszes") + "_mtmt_kereses.csl.json";
+            }
+
+            const blob = new Blob([tartalom], { type: mimeTipus });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = fajlnev;
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+
+        // =========================================================================
+        // HÁLÓZATKUTATÓ MODUL: INTEGRÁCIÓ AZ MTMT LISTÁBA
+        // Cél: OpenAlex tételek konvertálása MTMT formátumra és beillesztés a listába
+        // =========================================================================
+
+        let openAlexCache = {};
+        // Negatív azonosítókat adunk az OpenAlex tételeknek, hogy sose ütközzenek az MTMT ID-kkal
+        let oaFakeIdCounter = -1;
+
+        function hozzaadOpenAlexTeltel(oaId, gombElem) {
+            const relWork = openAlexCache[oaId];
+            if (!relWork) return;
+
+            // --- 1. LÉPÉS: Objektum konvertálása kompatibilis MTMT formátumra ---
+            const ujMtid = oaFakeIdCounter--;
+
+            let mtmtSzerzok = [];
+            if (relWork.authorships) {
+                relWork.authorships.forEach(a => {
+                    // Az OpenAlex 'Family, Given' nevének szimulálása
+                    let nameParts = a.author.display_name.split(' ');
+                    let family = nameParts.length > 1 ? nameParts.pop() : nameParts[0];
+                    let given = nameParts.length > 0 ? nameParts.join(' ') : "";
+
+                    mtmtSzerzok.push({
+                        familyName: family,
+                        givenName: given,
+                        author: { label: `${family} ${given}` }
+                    });
+                });
+            }
+
+            let mtmtAzonositok = [];
+            if (relWork.doi) {
+                mtmtAzonositok.push({
+                    source: { label: "DOI" },
+                    idValue: relWork.doi.replace('https://doi.org/', ''),
+                    realUrl: relWork.doi
+                });
+            }
+            mtmtAzonositok.push({
+                source: { label: "OpenAlex" },
+                idValue: oaId,
+                realUrl: `https://openalex.org/${oaId}`
+            });
+
+            let folyoiratNev = relWork.primary_location && relWork.primary_location.source ? relWork.primary_location.source.display_name : "Ismeretlen forrás (OpenAlex)";
+
+            let ujPub = {
+                mtid: ujMtid,
+                title: relWork.title || "Ismeretlen cím",
+                publishedYear: relWork.publication_year || "",
+                label: `${mtmtSzerzok.map(s => s.familyName).join(', ')} - ${relWork.title} (${relWork.publication_year})`,
+                category: { label: 'Tudományos' },
+                type: { label: relWork.type === 'book' ? 'Könyv' : 'Folyóiratcikk' },
+                subType: { label: 'OpenAlex import' },
+                core: true, // Forrásközleményként kezeljük, hogy a CSL és export motorok feldolgozzák
+                citation: false,
+                journal: {
+                    title: folyoiratNev,
+                    label: folyoiratNev
+                },
+                authorships: mtmtSzerzok,
+                identifiers: mtmtAzonositok,
+                isOpenAlex: true, // EGYEDI AZONOSÍTÓ TAG a vizuális megkülönböztetéshez
+                created: new Date().toISOString()
+            };
+
+            // --- 2. LÉPÉS: Beillesztés a fő listába ---
+            aktualisTalalatok.unshift(ujPub); // A lista legelejére tesszük
+            megjelenoTalalatok.unshift(ujPub);
+
+            // Újrarenderelés a kibővített listával
+            talalatokMegjelenitese(megjelenoTalalatok);
+
+            // --- 3. LÉPÉS: Vizuális visszajelzés a gombon ---
+            gombElem.style.backgroundColor = "#6c757d";
+            gombElem.innerText = "✔ Hozzáadva";
+            gombElem.disabled = true;
+        }
+
+
+        // =========================================================================
+        // HÁLÓZATKUTATÓ MODUL: ESEMÉNYKEZELŐK
+        // =========================================================================
+
+        // --- Gomb aktiválása/inaktiválása ---
+        // A dokumentumon lévő kattintásoknál ellenőrizzük, van-e bepipált checkbox (Event Delegation).
+        document.addEventListener('click', () => {
+            const halozatiGomb = document.getElementById('gomb-halozati-elemzes');
+            if (halozatiGomb) {
+                const vanKijelolve = document.querySelectorAll('.export-kivalaszto:checked').length > 0;
+                halozatiGomb.disabled = !vanKijelolve;
+            }
+        });
+
+        // --- Gomb eseményfigyelő ---
+        // A hálózati gomb kattintási eseménye
+        const initGomb = document.getElementById('gomb-halozati-elemzes');
+        if (initGomb) initGomb.addEventListener('click', halozatiElemzesFuttatasa);
+
+
+        // =========================================================================
+        // HÁLÓZATKUTATÓ MODUL: SEGÉDFÜGGVÉNYEK
+        // =========================================================================
+
+        // --- AZONOSÍTÓK KIGYŰJTÉSE ---
+        // Kinyeri a kijelölt (pipált) elemekből a DOI és OpenAlex azonosítókat.
+        function gyujtAzonositok() {
+            const kijeloltMtmtIdk = Array.from(document.querySelectorAll('.export-kivalaszto:checked')).map(cb => parseInt(cb.value));
+            let doik = [];
+            let openalexAzonositok = [];
+
+            // Csak azokon az elemeken iterálunk, amik a képernyőn vannak és ki lettek jelölve
+            megjelenoTalalatok.forEach(pub => {
+                if (kijeloltMtmtIdk.includes(pub.mtid)) {
+                    if (pub.identifiers) {
+                        let doiObj = pub.identifiers.find(id => id.source && id.source.label === "DOI");
+                        let oaObj = pub.identifiers.find(id => id.source && id.source.label === "OpenAlex");
+
+                        if (doiObj && doiObj.idValue) {
+                            doik.push(doiObj.idValue);
+                        } else if (oaObj && oaObj.idValue) {
+                            openalexAzonositok.push(oaObj.idValue);
+                        }
+                    }
+                }
+            });
+            return { doik, openalexAzonositok };
+        }
+
+
+
+        // =========================================================================
+        // HÁLÓZATKUTATÓ MODUL: KO-CITÁCIÓS (EGYÜTTES IDÉZÉS) ALGORITMUS
+        // Cél: Felkutatni azokat a cikkeket, amelyek a kijelölt tételekkel
+        // gyakran szerepelnek együtt más harmadik publikációk irodalomjegyzékében.
+        // =========================================================================
+        async function koCitacioKereses(doiLista, openalexLista = []) {
+            try {
+                // --- 1. LÉPÉS: ALAPMŰVEK LEKÉRÉSE ---
+                let baseWorks = [];
+                // Biztonsági limit: az OpenAlex API nem szereti a végtelen hosszú URL-eket
+                if (doiLista.length > 0) {
+                    const doiRes = await fetch(`https://api.openalex.org/works?filter=doi:${doiLista.slice(0, 50).join('|')}`);
+                    const doiData = await doiRes.json();
+                    if (doiData.results) baseWorks.push(...doiData.results);
+                }
+                if (openalexLista.length > 0) {
+                    const oaRes = await fetch(`https://api.openalex.org/works?filter=openalex:${openalexLista.slice(0, 50).join('|')}`);
+                    const oaData = await oaRes.json();
+                    if (oaData.results) baseWorks.push(...oaData.results);
+                }
+
+                const eredetiIdk = new Set(baseWorks.map(w => w.id.split('/').pop()));
+                const eredetiIdkTomb = Array.from(eredetiIdk).slice(0, 50);
+
+                // Ha az alapműveknek nincs felismerhető OpenAlex ID-ja, kilépünk
+                if (eredetiIdkTomb.length === 0) return [];
+
+                // --- 2. LÉPÉS: IDÉZŐ CIKKEK LEKÉRÉSE (EGYETLEN HÍVÁSSAL) ---
+                // A Promise.all helyett egyetlen kombinált hívást használunk. 
+                // Ez kiküszöböli a szerver letiltását (Rate Limit / 429-es hiba).
+                const citingRes = await fetch(`https://api.openalex.org/works?filter=cites:${eredetiIdkTomb.join('|')}&per-page=100`);
+                if (!citingRes.ok) throw new Error("Hiba az idéző cikkek letöltésekor.");
+                const citingData = await citingRes.json();
+
+                // Ha az alapműveket még senki sem idézte, nincs ko-citáció
+                if (!citingData.results || citingData.results.length === 0) return [];
+
+                // --- 3. LÉPÉS: REFERENCIÁK KIGYŰJTÉSE ÉS SZÁMLÁLÁSA ---
+                const referenciaSzamlalo = {};
+
+                citingData.results.forEach(citingWork => {
+                    if (citingWork.referenced_works) {
+                        citingWork.referenced_works.forEach(refUrl => {
+                            const refId = refUrl.split('/').pop();
+                            // Ha a hivatkozás NEM az eredeti cikkünk, növeljük a számlálót
+                            if (!eredetiIdk.has(refId)) {
+                                referenciaSzamlalo[refId] = (referenciaSzamlalo[refId] || 0) + 1;
+                            }
+                        });
+                    }
+                });
+
+                // --- 4. LÉPÉS: TOPLISTA KÉSZÍTÉSE ÉS METAADATOK LETÖLTÉSE ---
+                const top10 = Object.entries(referenciaSzamlalo)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 10);
+
+                if (top10.length === 0) return [];
+
+                const top10Ids = top10.map(item => item[0]);
+
+                const metaRes = await fetch(`https://api.openalex.org/works?filter=openalex:${top10Ids.join('|')}`);
+                const metaData = await metaRes.json();
+
+                if (metaData.results) {
+                    return metaData.results.map(work => {
+                        const id = work.id.split('/').pop();
+                        const frequencyObj = top10.find(t => t[0] === id);
+                        const frequency = frequencyObj ? frequencyObj[1] : 0;
+                        return { ...work, coCitationCount: frequency };
+                    }).sort((a, b) => b.coCitationCount - a.coCitationCount);
+                }
+                return [];
+
+            } catch (error) {
+                console.error("Hiba a ko-citációs keresésben:", error);
+                return []; // Ne fagyjon ki a felület, ha esetleg szerverhiba van
+            }
+        }
+
+
+        // =========================================================================
+        // HÁLÓZATKUTATÓ MODUL: FŐ VEZÉRLŐ FÜGGVÉNY (BIBLIOGRÁFIAI CSATOLÁS ÉS KO-CITÁCIÓ)
+        // =========================================================================
+        async function halozatiElemzesFuttatasa() {
+            const gomb = document.getElementById('gomb-halozati-elemzes');
+            const talca = document.getElementById('halozati-talca');
+            const eredmenyDiv = document.getElementById('halozati-eredmeny');
+
+            // Kapcsolók állapotának lekérdezése
+            const runBibCsatolas = document.getElementById('cb-bib-csatolas').checked;
+            const runKoCitacio = document.getElementById('cb-kocitacio').checked;
+
+            if (!runBibCsatolas && !runKoCitacio) {
+                alert("Kérjük, válasszon ki legalább egy elemzési módot a gomb melletti jelölőnégyzetekkel!");
+                return;
+            }
+
+            try {
+                // --- 1. LÉPÉS: UI VÉDELEM ÉS AZONOSÍTÓK BEGYŰJTÉSE ---
+                gomb.disabled = true;
+                gomb.innerText = "⏳ Elemzés folyamatban...";
+                talca.style.display = "block";
+                eredmenyDiv.innerHTML = "<p>Adatok lekérése az OpenAlex hálózatából...</p>";
+
+                const { doik, openalexAzonositok } = gyujtAzonositok();
+
+                if (doik.length === 0 && openalexAzonositok.length === 0) {
+                    throw new Error("A kijelölt tételekhez nem található sem DOI, sem OpenAlex azonosító.");
+                }
+
+                let baseWorks = [];
+
+                // --- 2. LÉPÉS: ALAP CIKKEK LEKÉRÉSE (DOI VAGY OPENALEX ID ALAPJÁN) ---
+                if (doik.length > 0) {
+                    const doiResponse = await fetch(`https://api.openalex.org/works?filter=doi:${doik.join('|')}`);
+                    if (!doiResponse.ok) throw new Error(`OpenAlex DOI hiba: ${doiResponse.status}`);
+                    const doiData = await doiResponse.json();
+                    if (doiData.results) baseWorks.push(...doiData.results);
+                }
+
+                if (openalexAzonositok.length > 0) {
+                    const oaResponse = await fetch(`https://api.openalex.org/works?filter=openalex:${openalexAzonositok.join('|')}`);
+                    if (!oaResponse.ok) throw new Error(`OpenAlex ID hiba: ${oaResponse.status}`);
+                    const oaData = await oaResponse.json();
+                    if (oaData.results) baseWorks.push(...oaData.results);
+                }
+
+                // Tálca ürítése a tényleges renderelés előtt
+                eredmenyDiv.innerHTML = "";
+
+                // --- 3-5. LÉPÉS: BIBLIOGRÁFIAI CSATOLÁS (CSAK HA BE VAN PIPÁLVA) ---
+                if (runBibCsatolas) {
+                    let relatedWorkUrls = [];
+                    baseWorks.forEach(work => {
+                        if (work.related_works && work.related_works.length > 0) {
+                            relatedWorkUrls.push(...work.related_works);
+                        }
+                    });
+
+                    let uniqueRelatedIds = [...new Set(relatedWorkUrls)].map(url => url.split('/').pop());
+
+                    if (uniqueRelatedIds.length > 0) {
+                        let limitRelated = uniqueRelatedIds.slice(0, 50);
+                        const metaadatResponse = await fetch(`https://api.openalex.org/works?filter=openalex:${limitRelated.join('|')}`);
+                        if (!metaadatResponse.ok) throw new Error("Hiba a kapcsolódó cikkek metaadatainak letöltésekor.");
+                        const metaadatok = await metaadatResponse.json();
+
+                        if (metaadatok.results && metaadatok.results.length > 0) {
+                            let bibCim = document.createElement('h3');
+                            bibCim.style.cssText = "color: #e83e8c; margin-top: 10px; border-bottom: 2px dashed #f8bbd0; padding-bottom: 10px;";
+                            bibCim.innerText = `🔗 Bibliográfiai csatolások (${metaadatok.results.length} találat)`;
+                            eredmenyDiv.appendChild(bibCim);
+
+                            metaadatok.results.forEach(relWork => {
+                                let oaId = relWork.id.split('/').pop();
+                                openAlexCache[oaId] = relWork; // Gyorsítótárazás a későbbi hozzáadáshoz
+
+                                let title = relWork.title || "Ismeretlen cím";
+                                let year = relWork.publication_year || "é.n.";
+                                let authors = (relWork.authorships || []).map(a => a.author.display_name).join(', ') || "Ismeretlen szerző";
+                                let workUrl = relWork.doi || relWork.id;
+                                let workDoi = relWork.doi ? `<a href="${relWork.doi}" target="_blank" style="color: #004481;">${relWork.doi}</a>` : "Nincs DOI";
+
+                                let card = document.createElement('div');
+                                card.className = "publikacio-kartya";
+                                card.style.cssText = "border: 1px solid #f8bbd0; padding: 12px; margin-bottom: 10px; border-radius: 5px; background: #fff; display: flex; justify-content: space-between; align-items: center; transition: box-shadow 0.2s;";
+                                card.onmouseover = function () { this.style.boxShadow = "0 2px 8px rgba(232, 62, 140, 0.2)"; };
+                                card.onmouseout = function () { this.style.boxShadow = "none"; };
+
+                                card.innerHTML = `
+                                    <div style="flex-grow: 1; padding-right: 15px;">
+                                        <div style="margin-bottom: 5px;">
+                                            <span style="background-color: #e83e8c; color: white; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; margin-right: 5px;">
+                                                🔗 Bibliográfiai Csatolás (Közös irodalomjegyzék)
+                                            </span>
+                                        </div>
+                                        <h4 style="margin: 0 0 5px 0; font-size: 16px;">
+                                            <a href="${workUrl}" target="_blank" title="Megnyitás új lapon" style="color: #e83e8c; text-decoration: none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
+                                                ${title}
+                                            </a> 
+                                            <span style="color:#666;">(${year})</span>
+                                        </h4>
+                                        <p style="margin: 0 0 5px 0; font-size: 13px; color: #555;"><strong>Szerző(k):</strong> ${authors}</p>
+                                        <p style="margin: 0; font-size: 12px; color: #999;">
+                                            <strong>DOI:</strong> ${workDoi} | 
+                                            <strong>OpenAlex ID:</strong> <a href="${relWork.id}" target="_blank" style="color: #004481;">${oaId}</a>
+                                        </p>
+                                    </div>
+                                    <button class="kicsi-gomb" style="background-color: #28a745; color: white; padding: 6px 12px; font-weight: bold; border: none; cursor: pointer; white-space: nowrap;" onclick="hozzaadOpenAlexTeltel('${oaId}', this)">
+                                        + Hozzáadás
+                                    </button>
+                                `;
+                                eredmenyDiv.appendChild(card);
+                            });
+                        }
+                    } else {
+                        eredmenyDiv.innerHTML += "<p>Nincsenek elérhető bibliográfiai csatolások a kiválasztott dokumentumokhoz.</p>";
+                    }
+                }
+
+                // --- 6. LÉPÉS: KO-CITÁCIÓS ALGORITMUS (CSAK HA BE VAN PIPÁLVA) ---
+                if (runKoCitacio) {
+                    const koCitaciosEredmenyek = await koCitacioKereses(doik, openalexAzonositok);
+
+                    if (koCitaciosEredmenyek.length > 0) {
+                        let koCitCim = document.createElement('h3');
+                        koCitCim.style.cssText = "color: #004481; margin-top: 30px; border-top: 2px dashed #ccc; padding-top: 15px;";
+                        koCitCim.innerText = `⭐ Leggyakoribb Ko-citált Partnerek (${koCitaciosEredmenyek.length} találat)`;
+                        eredmenyDiv.appendChild(koCitCim);
+
+                        koCitaciosEredmenyek.forEach(relWork => {
+                            let oaId = relWork.id.split('/').pop();
+                            openAlexCache[oaId] = relWork; // Gyorsítótárazás a későbbi hozzáadáshoz
+
+                            let title = relWork.title || "Ismeretlen cím";
+                            let year = relWork.publication_year || "é.n.";
+                            let authors = (relWork.authorships || []).map(a => a.author.display_name).join(', ') || "Ismeretlen szerző";
+                            let workUrl = relWork.doi || relWork.id;
+                            let workDoi = relWork.doi ? `<a href="${relWork.doi}" target="_blank" style="color: #004481;">${relWork.doi}</a>` : "Nincs DOI";
+
+                            let card = document.createElement('div');
+                            card.className = "publikacio-kartya";
+                            card.style.cssText = "border: 1px solid #17a2b8; padding: 12px; margin-bottom: 10px; border-radius: 5px; background: #f0f9fa; display: flex; justify-content: space-between; align-items: center; transition: box-shadow 0.2s;";
+                            card.onmouseover = function () { this.style.boxShadow = "0 2px 8px rgba(23, 162, 184, 0.3)"; };
+                            card.onmouseout = function () { this.style.boxShadow = "none"; };
+
+                            card.innerHTML = `
+                                <div style="flex-grow: 1; padding-right: 15px;">
+                                    <div style="margin-bottom: 5px;">
+                                        <span style="background-color: #17a2b8; color: white; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; margin-right: 5px;">
+                                            ⭐ Ko-citált Partner (${relWork.coCitationCount} együttes idézés)
+                                        </span>
+                                    </div>
+                                    <h4 style="margin: 0 0 5px 0; font-size: 16px;">
+                                        <a href="${workUrl}" target="_blank" title="Megnyitás új lapon" style="color: #17a2b8; text-decoration: none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
+                                            ${title}
+                                        </a>
+                                        <span style="color:#666;">(${year})</span>
+                                    </h4>
+                                    <p style="margin: 0 0 5px 0; font-size: 13px; color: #555;"><strong>Szerző(k):</strong> ${authors}</p>
+                                    <p style="margin: 0; font-size: 12px; color: #999;">
+                                        <strong>DOI:</strong> ${workDoi} |
+                                        <strong>OpenAlex ID:</strong> <a href="${relWork.id}" target="_blank" style="color: #004481;">${oaId}</a>
+                                    </p>
+                                </div>
+                                <button class="kicsi-gomb" style="background-color: #28a745; color: white; padding: 6px 12px; font-weight: bold; border: none; cursor: pointer; white-space: nowrap;" onclick="hozzaadOpenAlexTeltel('${oaId}', this)">
+                                    + Hozzáadás
+                                </button>
+                            `;
+                            eredmenyDiv.appendChild(card);
+                        });
+                    } else if (runKoCitacio) {
+                        eredmenyDiv.innerHTML += "<p>Nincsenek elérhető ko-citációs partnerek a kiválasztott dokumentumokhoz.</p>";
+                    }
+                }
+
+            } catch (error) {
+                console.error("OpenAlex Hiba:", error);
+                eredmenyDiv.innerHTML = `<div style="padding: 10px; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 4px;"><strong>Hiba történt:</strong> ${error.message}</div>`;
+            } finally {
+                // --- 7. LÉPÉS: GOMB ÁLLAPOT VISSZAÁLLÍTÁSA ---
+                gomb.disabled = false;
+                gomb.innerText = "🕸️ Kijelöltek hálózati elemzése";
+            }
+        }
+
+        // =========================================================================
+        // BEEMELT ELŐSZŰRŐ TOKENEK LOGIKÁJA ÉS SZINKRONIZÁCIÓJA
+        // =========================================================================
+        function frissitBeemeltEloszurok() {
+            const tarolo = document.getElementById('beemelt-tokenek-tarolo');
+            const infoSav = document.getElementById('beemelt-szurok-info');
+            if (!tarolo) return;
+
+            tarolo.innerHTML = '';
+            let tokenek = [];
+
+            // 1. Szerző
+            const authorElem = document.getElementById('input-eloszuro-author');
+            if (authorElem && authorElem.value.trim()) {
+                tokenek.push({
+                    tipus: 'author',
+                    cimke: 'Szerző',
+                    ikon: '👤',
+                    ertek: authorElem.value.trim(),
+                    osztaly: 'token-szerzo'
+                });
+            }
+
+            // 2. Folyóirat
+            const journalElem = document.getElementById('input-eloszuro-journal');
+            if (journalElem && journalElem.value.trim()) {
+                tokenek.push({
+                    tipus: 'journal',
+                    cimke: 'Folyóirat',
+                    ikon: '📚',
+                    ertek: journalElem.value.trim(),
+                    osztaly: 'token-folyoirat'
+                });
+            }
+
+            // 3. Intézmény
+            const instElem = document.getElementById('input-eloszuro-institute');
+            if (instElem && instElem.value.trim()) {
+                tokenek.push({
+                    tipus: 'institute',
+                    cimke: 'Intézmény',
+                    ikon: '🏛️',
+                    ertek: instElem.value.trim(),
+                    osztaly: 'token-intezmeny'
+                });
+            }
+
+            // 4. Évszám intervallum
+            const evTolElem = document.getElementById('input-eloszuro-ev-tol');
+            const evIgElem = document.getElementById('input-eloszuro-ev-ig');
+            const evTol = evTolElem ? evTolElem.value.trim() : '';
+            const evIg = evIgElem ? evIgElem.value.trim() : '';
+            if (evTol || evIg) {
+                let evSzoveg = '';
+                if (evTol && evIg) evSzoveg = `${evTol} – ${evIg}`;
+                else if (evTol) evSzoveg = `≥ ${evTol}`;
+                else evSzoveg = `≤ ${evIg}`;
+
+                tokenek.push({
+                    tipus: 'year',
+                    cimke: 'Év',
+                    ikon: '📅',
+                    ertek: evSzoveg,
+                    osztaly: 'token-ev'
+                });
+            }
+
+            // 5. Közlemény szerepe
+            const allapotElem = document.getElementById('input-eloszuro-allapot');
+            if (allapotElem && allapotElem.value !== 'mind') {
+                const szoveg = allapotElem.value === 'forras' ? 'Forrásközlemény' : 'Idéző közlemény';
+                tokenek.push({
+                    tipus: 'allapot',
+                    cimke: 'Szerep',
+                    ikon: '📑',
+                    ertek: szoveg,
+                    osztaly: 'token-szerep'
+                });
+            }
+
+            if (tokenek.length > 0) {
+                tokenek.forEach((t, index) => {
+                    if (index > 0) {
+                        const esElem = document.createElement('span');
+                        esElem.className = 'beemelt-es-kapcsolat';
+                        esElem.innerText = 'ÉS';
+                        tarolo.appendChild(esElem);
+                    }
+
+                    const tokenBadge = document.createElement('span');
+                    tokenBadge.className = `beemelt-token ${t.osztaly}`;
+                    tokenBadge.innerHTML = `
+                        <span class="token-ikon">${t.ikon}</span>
+                        <span class="token-nev">${t.cimke}:</span>
+                        <span class="token-ertek" title="${t.ertek.replace(/"/g, '&quot;')}">${t.ertek}</span>
+                        <span class="token-torles" title="Szűrő törlése" onclick="torolBeemeltEloszuro('${t.tipus}')">&times;</span>
+                    `;
+                    tarolo.appendChild(tokenBadge);
+                });
+
+                // Tegyünk egy ÉS kapcsolatot a szöveges kereső elé is
+                const zarEs = document.createElement('span');
+                zarEs.className = 'beemelt-es-kapcsolat zar-es';
+                zarEs.innerText = 'ÉS';
+                tarolo.appendChild(zarEs);
+
+                if (infoSav) infoSav.style.display = 'block';
+
+                const inputKereso = document.getElementById('keresoszoveg');
+                if (inputKereso) {
+                    inputKereso.placeholder = 'További cím, absztrakt vagy kulcsszavak hozzáadása...';
+                }
+            } else {
+                if (infoSav) infoSav.style.display = 'none';
+                const inputKereso = document.getElementById('keresoszoveg');
+                if (inputKereso) {
+                    inputKereso.placeholder = 'Pl.: stress brain* "systematic review" -post*';
+                }
+            }
+        }
+
+        function torolBeemeltEloszuro(tipus) {
+            if (tipus === 'author') {
+                const el = document.getElementById('input-eloszuro-author');
+                if (el) el.value = '';
+            } else if (tipus === 'journal') {
+                const el = document.getElementById('input-eloszuro-journal');
+                if (el) el.value = '';
+            } else if (tipus === 'institute') {
+                const el = document.getElementById('input-eloszuro-institute');
+                if (el) el.value = '';
+            } else if (tipus === 'year') {
+                const el1 = document.getElementById('input-eloszuro-ev-tol');
+                const el2 = document.getElementById('input-eloszuro-ev-ig');
+                if (el1) el1.value = '';
+                if (el2) el2.value = '';
+            } else if (tipus === 'allapot') {
+                const el = document.getElementById('input-eloszuro-allapot');
+                if (el) el.value = 'mind';
+            }
+            frissitBeemeltEloszurok();
+        }
+
+        // Eseményfigyelők regisztrálása az előszűrő mezőkhöz
+        document.addEventListener('DOMContentLoaded', function () {
+            const figyelendoMezok = [
+                'input-eloszuro-author',
+                'input-eloszuro-journal',
+                'input-eloszuro-institute',
+                'input-eloszuro-ev-tol',
+                'input-eloszuro-ev-ig'
+            ];
+
+            figyelendoMezok.forEach(id => {
+                const elem = document.getElementById(id);
+                if (elem) {
+                    elem.addEventListener('input', frissitBeemeltEloszurok);
+                    elem.addEventListener('change', frissitBeemeltEloszurok);
+                }
+            });
+
+            const allapotElem = document.getElementById('input-eloszuro-allapot');
+            if (allapotElem) {
+                allapotElem.addEventListener('change', frissitBeemeltEloszurok);
+            }
+
+            const keresoElem = document.getElementById('keresoszoveg');
+            if (keresoElem) {
+                keresoElem.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter') {
+                        szerverKereses();
+                    }
+                });
+            }
+
+            // Kezdeti állapot frissítése
+            frissitBeemeltEloszurok();
+        });
+    </script>
+</body>
+
+</html>

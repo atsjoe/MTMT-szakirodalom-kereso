@@ -1,0 +1,494 @@
+/* Alapvető beállítások */
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background-color: #f8f9fa;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+.kontener {
+    max-width: 1200px; /* Szélesebb felület a tudományos munkához */
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Fejléc stílusai */
+.fejlec {
+    background-color: #004481; /* MTMT kék */
+    color: white;
+    padding: 20px 0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.fejlec h1 {
+    margin-top: 0;
+    font-size: 28px;
+}
+
+.kereso-sav {
+    display: flex;
+    gap: 10px;
+}
+
+.kereso-sav input {
+    flex-grow: 1;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 4px;
+}
+
+.kereso-sav button {
+    background-color: #ffb612; /* Kontrasztos sárga gomb */
+    color: #333;
+    border: none;
+    padding: 0 25px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.kereso-sav button:hover {
+    background-color: #e5a310;
+}
+
+.fejlec-linkek {
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.fejlec-linkek a {
+    color: #cce0ff;
+    text-decoration: none;
+    margin-right: 15px;
+}
+
+.fejlec-linkek a:hover {
+    text-decoration: underline;
+}
+
+/* Fő elrendezés (CSS Grid) */
+.fo-elrendezes {
+    display: grid;
+    grid-template-columns: 250px 1fr; /* Bal oszlop 250px, jobb oszlop kitölti a maradékot */
+    gap: 30px;
+    margin-top: 30px;
+}
+
+/* Bal oszlop (Szűrők) */
+.szuro-oszlop {
+    background-color: white;
+    padding: 20px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    align-self: start; /* Ne nyúljon le a képernyő aljáig feleslegesen */
+}
+
+.szuro-doboz {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+}
+
+.szuro-doboz h4 {
+    margin: 0 0 10px 0;
+    color: #555;
+}
+
+.kis-input {
+    width: 100%;
+    padding: 5px;
+    margin-top: 5px;
+    box-sizing: border-box;
+}
+
+.szuro-gomb {
+    width: 100%;
+    padding: 10px;
+    background-color: #eee;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+/* Jobb oszlop (Találatok) */
+.talalat-fejlec {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #004481;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+}
+
+.talalat-fejlec h2 {
+    margin: 0;
+    color: #004481;
+}
+
+.export-gombok {
+    display: flex;
+    gap: 10px;
+}
+
+.kicsi-gomb {
+    padding: 5px 10px;
+    background-color: #e9ecef;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.kicsi-gomb:hover {
+    background-color: #dde0e3;
+}
+
+#eredmeny {
+    background-color: white;
+    padding: 20px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    min-height: 200px;
+}
+
+/* Gördíthető szűrő listák */
+.gorgetheto-lista {
+    max-height: 160px;
+    /* Ennél nem lesz magasabb a doboz */
+    overflow-y: auto;
+    /* Ha hosszabb, kap egy függőleges görgőt */
+    border: 1px solid #eee;
+    padding: 10px;
+    background-color: #fcfcfc;
+    border-radius: 4px;
+}
+
+/* Szűkít/Kizár választó formázása */
+.mod-valaszto {
+    width: 100%;
+    margin-bottom: 8px;
+    padding: 4px;
+    font-size: 12px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    background-color: #fff;
+    color: #004481;
+    font-weight: bold;
+}
+
+/* Aktív szűrők sávja a találatok felett */
+.aktiv-szurok-tarolo {
+    background-color: #e6f2ff;
+    /* Halványkék háttér, hogy kitűnjön */
+    border: 1px solid #b3d4ff;
+    padding: 12px 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.aktiv-szurok-tarolo strong {
+    color: #004481;
+    margin-right: 5px;
+}
+
+/* Maguk a kis címkék */
+.szuro-cimke {
+    display: inline-block;
+    background-color: #004481;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.szuro-cimke.kizaro {
+    background-color: #d9534f;
+    /* Piros szín a kizárt elemeknek */
+}
+
+/* --- MÓDVÁLASZTÓ GOMBOK (EGYSZERŰ / ÖSSZETETT / SLR) --- */
+.mod-valaszto-gombok {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 15px;
+}
+
+.mod-gomb {
+    background-color: #e9ecef;
+    color: #333;
+    border: 1px solid #ccc;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.mod-gomb:hover {
+    background-color: #dde2e6;
+}
+
+.mod-gomb.aktiv {
+    background-color: #004481;
+    color: white;
+    border-color: #004481;
+}
+
+.relevancia-cimke {
+    background-color: #28a745;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+/* --- MTMT SZERZŐ / FOLYÓIRAT KERESŐ MODÁLIS ABLAK --- */
+.modal-hatter {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(3px);
+}
+
+.modal-tartalom {
+    background-color: #fff;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    max-height: 85vh;
+    box-sizing: border-box;
+}
+
+.modal-fejlec {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.szerzo-lista-tarolo {
+    overflow-y: auto;
+    flex-grow: 1;
+    padding-right: 5px;
+}
+
+.szerzo-elem {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s, border-left 0.2s;
+}
+
+.szerzo-elem:hover {
+    background-color: #f0f7ff;
+    border-left: 4px solid #004481;
+}
+
+.szerzo-nev {
+    font-weight: bold;
+    color: #004481;
+    font-size: 14px;
+}
+
+.szerzo-intezmeny {
+    font-size: 12px;
+    color: #666;
+    margin-top: 4px;
+}
+
+/* --- HÁLÓZATKUTATÓ MODUL STÍLUSOK (OPENALEX) --- */
+.gomb-halozat {
+    background-color: #e83e8c;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.gomb-halozat:hover:not(:disabled) {
+    background-color: #d63384;
+}
+
+.gomb-halozat:disabled {
+    background-color: #f8bbd0;
+    color: #fff;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.halozati-talca-kontener {
+    margin-top: 30px;
+    border: 2px solid #e83e8c;
+    border-radius: 8px;
+    background-color: #fdf3f8;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(232, 62, 140, 0.15);
+}
+
+.halozati-fejlec-sav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px dashed #f8bbd0;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+/* --- BEEMELT ELŐSZŰRŐ TOKENEK A KERESŐSÁVBAN --- */
+.normal-kereso-kontener {
+    background: #ffffff;
+    border-radius: 6px;
+    padding: 6px 10px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+    border: 2px solid #004481;
+    margin-bottom: 5px;
+}
+
+.beemelt-token {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background-color: #004481;
+    color: white;
+    padding: 3px 8px 3px 10px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 500;
+    max-width: 320px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    animation: beemelAnim 0.25s ease-out;
+}
+
+@keyframes beemelAnim {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-2px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.beemelt-token.token-szerzo {
+    background-color: #004481; /* MTMT Kék */
+    border-left: 3px solid #ffb612;
+}
+
+.beemelt-token.token-folyoirat {
+    background-color: #17a2b8; /* Folyóirat türkiz */
+    border-left: 3px solid #002244;
+}
+
+.beemelt-token.token-intezmeny {
+    background-color: #6f42c1; /* Intézmény lila */
+    border-left: 3px solid #ffc107;
+}
+
+.beemelt-token.token-ev {
+    background-color: #e67e22; /* Évszám narancs */
+    color: #fff;
+    border-left: 3px solid #fff;
+}
+
+.beemelt-token.token-szerep {
+    background-color: #28a745; /* Zöld */
+    border-left: 3px solid #fff;
+}
+
+.beemelt-token .token-nev {
+    font-weight: bold;
+    opacity: 0.9;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.beemelt-token .token-ertek {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 170px;
+}
+
+.beemelt-token .token-torles {
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    width: 16px;
+    height: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.25);
+    margin-left: 4px;
+    transition: background-color 0.15s, transform 0.15s;
+}
+
+.beemelt-token .token-torles:hover {
+    background-color: rgba(255, 255, 255, 0.95);
+    color: #d9534f;
+    transform: scale(1.15);
+}
+
+.beemelt-es-kapcsolat {
+    display: inline-block;
+    background-color: #e3ebf5;
+    color: #004481;
+    font-weight: 800;
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    border: 1px solid #b8d2ed;
+    user-select: none;
+    letter-spacing: 0.5px;
+}
+
+.kereso-gomb-kiemelt {
+    background-color: #ffb612 !important;
+    color: #111 !important;
+    border: none;
+    padding: 9px 22px !important;
+    font-size: 15px !important;
+    font-weight: bold !important;
+    border-radius: 4px;
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.kereso-gomb-kiemelt:hover {
+    background-color: #e5a310 !important;
+    transform: translateY(-1px);
+}

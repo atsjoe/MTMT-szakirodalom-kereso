@@ -1,0 +1,19 @@
+{
+  "entity": "Publication",
+  "source": "MTMT v2 REST API (https://m2.mtmt.hu/api/publication)",
+  "fields": {
+    "mtid": "Egyedi MTMT belső azonosító (numerikus)",
+    "title": "A közlemény címe",
+    "publishedYear": "Megjelenés éve (YYYY)",
+    "label": "Teljes bibliográfiai hivatkozás szöveges formában",
+    "authorships": "Szerzői lista (tömb), benne: familyName, givenName, author.mtid",
+    "journal": "Folyóirat metaadatok (title, pIssn, eIssn)",
+    "identifiers": "Külső azonosítók (DOI, OpenAlex, WoS, Scopus)",
+    "category": "Jelleg (label)",
+    "type": "Típus (label)",
+    "subType": "Besorolás (label)",
+    "core": "Boolean (Forrásközlemény-e)",
+    "citation": "Boolean (Idéző közlemény-e)",
+    "internalId": "Belső MTMT sorszám (oldalszám hiányában hivatkozási pótlásra)"
+  }
+}

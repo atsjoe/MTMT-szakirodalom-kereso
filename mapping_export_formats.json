@@ -1,0 +1,30 @@
+{
+  "formats": {
+    "RIS": {
+      "TY": "Típus (JOUR/BOOK/CPAPER)",
+      "AU": "Szerzők (Family, Given)",
+      "TI": "Cikk vagy könyv címe",
+      "JO": "Folyóirat vagy forrás neve",
+      "PY": "Kiadás éve",
+      "SP/EP": "Kezdő és záró oldalszámok (hiány esetén internalId injekció)",
+      "M1": "Kiegészítő azonosító (internalId pótlás Zotero/Mendeley kompatibilitáshoz)",
+      "DO": "DOI azonosító"
+    },
+    "BibTeX": {
+      "entry_type": "@article, @book, @inproceedings",
+      "title": "{{Case Protected Title}} (kettős kapcsos zárójelekkel védve)",
+      "author": "and kapcsolattal összefűzve",
+      "journal": "Folyóirat neve",
+      "year": "Megjelenés éve",
+      "artno": "Pótolt internalId cikk-szám",
+      "doi": "DOI azonosító"
+    },
+    "CSL-JSON": {
+      "type": "article-journal, book",
+      "title": "Cím",
+      "author": "[{family, given}]",
+      "issued": "date-parts formátum: [[YYYY]]",
+      "note": "Injektált MTMT affiliációs és forrás adatok"
+    }
+  }
+}
