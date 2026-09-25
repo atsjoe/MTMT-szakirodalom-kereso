@@ -25,16 +25,45 @@
                     <a href="sugo_en.html" target="_blank" class="kicsi-gomb"
                         style="background-color: #17a2b8; color: #fff; text-decoration: none; padding: 8px 12px; display: inline-flex; align-items: center; font-weight: bold;">🇬🇧
                         Guide</a>
+                    <button type="button" onclick="mutatLetoltesiSegedletet()" class="kicsi-gomb"
+                        style="background-color: #28a745; color: #fff; border: none; padding: 8px 12px; display: inline-flex; align-items: center; font-weight: bold; cursor: pointer;">📥
+                        Letöltés</button>
                     <input type="file" id="fajl-feltolto" style="display:none" accept=".json"
                         onchange="keresesBetoltese(event)">
                 </div>
             </div>
 
+            <!-- MTMT LAPOZÁSI ÉS ROBOTVÉDELMI VEZÉRLŐPULT -->
+            <div style="margin-bottom: 14px; background: #ffffff; border: 1px solid #d0d7de; border-radius: 6px; padding: 8px 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    <span style="font-size: 12.5px; font-weight: bold; color: #004481; display: flex; align-items: center; gap: 4px;">
+                        <span>⚙️</span> MTMT Lapozási vezérlő:
+                    </span>
+                    <label for="lapozas-blokk-meret" style="font-size: 12px; color: #555;">Blokkméret:</label>
+                    <select id="lapozas-blokk-meret" style="font-size: 12px; padding: 4px 8px; border-radius: 4px; border: 1px solid #cbd5e1; background: #f8fafc; font-weight: 500;" title="Az MTMT robotvédelmi korlátjához igazított blokkméret (max 50-100 rekord/kérés)">
+                        <option value="50" selected>50 rekord / kérés (ajánlott, villámgyors &amp; robot-safe)</option>
+                        <option value="100">100 rekord / kérés</option>
+                    </select>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    <label for="lapozas-cel-limit" style="font-size: 12px; color: #555;">Kezdeti letöltési cél:</label>
+                    <select id="lapozas-cel-limit" style="font-size: 12px; padding: 4px 8px; border-radius: 4px; border: 1px solid #cbd5e1; background: #f8fafc; font-weight: 500;" title="Mennyi rekordot töltsön le a kereső motor lapozással">
+                        <option value="50">1. oldal (50 rekord) – villámgyors</option>
+                        <option value="250">Max 250 rekord (5 oldal)</option>
+                        <option value="500" selected>Max 500 rekord (10 oldal, alapértelmezett)</option>
+                        <option value="1000">Max 1000 rekord (20 oldal)</option>
+                        <option value="999999">Minden elérhető találat (összes oldal)</option>
+                    </select>
+                    <span style="font-size: 11.5px; color: #64748b; font-style: italic;">
+                        (további oldalak lapozó gombokkal bármikor betölthetők)
+                    </span>
+                </div>
+            </div>
+
+            <!-- FŐ FUNKCIÓ LAPFÜLEK (1. EGYSZERŰ KERESÉS / 2. SZISZTEMATIKUS SLR) -->
             <div class="mod-valaszto-gombok">
-                <button id="gomb-egyszeru" class="mod-gomb aktiv" onclick="valtasKeresoMod('egyszeru')">1. Egyszerű
-                    keresés</button>
-                <button id="gomb-osszetett" class="mod-gomb" onclick="valtasKeresoMod('osszetett')">2. Szisztematikus
-                    (SLR)</button>
+                <button id="gomb-egyszeru" class="mod-gomb aktiv" onclick="valtasKeresoMod('egyszeru')">🔍 1. Egyszerű keresés</button>
+                <button id="gomb-osszetett" class="mod-gomb" onclick="valtasKeresoMod('osszetett')">🧩 2. Szisztematikus (SLR)</button>
             </div>
 
             <div id="normal-kereso-kontener" class="normal-kereso-kontener">
@@ -43,12 +72,14 @@
                     <div id="beemelt-tokenek-tarolo" style="display: inline-flex; align-items: center; flex-wrap: wrap; gap: 6px;"></div>
 
                     <!-- Szabad szöveges keresőmező -->
-                    <input type="text" id="keresoszoveg" placeholder='Pl.: stress brain* "systematic review" -post*'
+                    <input type="text" id="keresoszoveg" placeholder='Pl.: "élet ellen*" bűncs* -nemi'
                         style="flex-grow: 1; min-width: 220px; padding: 8px 8px; font-size: 15px; border: none; outline: none; background: transparent; color: #222;">
                     
                     <button class="kereso-gomb-kiemelt" onclick="szerverKereses()" title="Keresés indítása a beírt szavakkal és az aktív előszűrőkkel">🔍 Keresés</button>
                     <button onclick="ujKereses()" style="background-color: #6c757d; color: white; border: none; padding: 8px 14px; font-weight: bold; border-radius: 4px; cursor: pointer;">Törlés</button>
                 </div>
+                <!-- Helyesírási / elírás javaslat konténer (pl. sysematic -> systematic) -->
+                <div id="kereses-helyesiras-javaslat" style="display: none; font-size: 12.5px; color: #854d0e; background: #fefce8; border: 1px solid #fef08a; padding: 7px 12px; border-radius: 4px; margin-top: 6px;"></div>
                 <!-- Segítő információs sáv ha van aktív beemelt előszűrő -->
                 <div id="beemelt-szurok-info" style="display: none; font-size: 11px; color: #004481; font-weight: 600; padding: 5px 2px 2px 2px; border-top: 1px dashed #d0e0f0; margin-top: 5px;">
                     ℹ️ Az előszűrőkben kijelölt szempontok logikai <strong>ÉS</strong> kapcsolattal érvényesülnek. A keresés futtatásához kattintson a <strong>Keresés</strong> gombra!
@@ -56,7 +87,7 @@
             </div>
 
             <div id="osszetett-panel"
-                style="display: none; background: #f4f7f6; padding: 15px; border-radius: 5px; border: 1px solid #dce8e6;">
+                style="display: none; background: #ffffff; padding: 16px; border-radius: 6px; border: 2px solid #004481; box-shadow: 0 3px 8px rgba(0,0,0,0.15);">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                     <div>
                         <p style="margin-top:0; font-size:13px; color:#333; font-weight: bold;">Szisztematikus keresés (építőkockák / PRISMA)</p>
@@ -85,7 +116,7 @@
                         <!-- Dinamikus tokenek ide fognak bekerülni -->
                     </div>
                     <div id="slr-nincs-szuro-uzenet" style="display: none; font-size: 12px; color: #666; font-style: italic;">
-                        Nincs aktív globális előszűrő (a bal oldali oszlopban szűkíthető a Szerző, Folyóirat, Intézmény, Évszám vagy Szerep).
+                        Nincs aktív globális előszűrő (a bal oldali oszlopban szűkíthető a Szerző, Folyóirat, Intézmény vagy Évszám).
                     </div>
                 </div>
 
@@ -119,16 +150,6 @@
                 <h3 style="margin-top: 0; color: #004481;">Előszűrők</h3>
                 <p style="font-size: 11px; color: #666; margin-top:-5px; margin-bottom: 10px;">Keresés szűkítése a
                     letöltés előtt</p>
-
-                <div class="szuro-doboz" style="padding-bottom: 5px;">
-                    <h4 style="margin-bottom: 5px;">Közlemény szerepe</h4>
-                    <select id="input-eloszuro-allapot"
-                        style="width: 100%; padding: 4px; border: 1px solid #ccc; border-radius: 3px; font-size: 12px;">
-                        <option value="mind">Mind (Forrás és Idéző is)</option>
-                        <option value="forras">Csak Forrásközlemény</option>
-                        <option value="idezo">Csak Idéző közlemény</option>
-                    </select>
-                </div>
 
                 <div class="szuro-doboz" style="padding-bottom: 5px;">
                     <h4 style="margin-bottom: 5px;">Kiadás éve</h4>
@@ -186,15 +207,6 @@
                     <option value="kizar">Kiválasztottak kizárása</option>
                 </select>
                 <div id="ev-lista" class="gorgetheto-lista">
-                    <p class="alap-uzenet">Várja az adatokat...</p>
-                </div>
-            </div>
-            <div class="szuro-doboz">
-                <h4>Közlemény szerepe</h4><select id="allapot-mod" class="mod-valaszto" onchange="kliensSzures()">
-                    <option value="tartalmaz">Kiválasztottak mutatása</option>
-                    <option value="kizar">Kiválasztottak kizárása</option>
-                </select>
-                <div id="allapot-lista" class="gorgetheto-lista">
                     <p class="alap-uzenet">Várja az adatokat...</p>
                 </div>
             </div>
@@ -285,7 +297,103 @@
             </div>
 
             <div id="eredmeny">
-                <p class="alap-uzenet">Kérjük, adja meg a keresési feltételeket a fenti mezőkben...</p>
+                <div class="alap-utmutato-kontener" id="kezdo-utmutato-egyszeru">
+                    <div class="alap-utmutato-fejlec">
+                        <div class="utmutato-ikon">💡</div>
+                        <div>
+                            <h3>Keresés menete az MTMT-ben (Egyszerű keresés)</h3>
+                            <p>Kövesse az alábbi három logikus lépést a releváns szakirodalom felkutatásához:</p>
+                        </div>
+                    </div>
+                    <div class="alap-utmutato-lepesek">
+                        <!-- 1. Előszűrők -->
+                        <div class="alap-utmutato-lepes">
+                            <div class="lepes-szam">1</div>
+                            <div class="lepes-tartalom">
+                                <div class="lepes-cimsor">
+                                    <span class="lepes-cim">Előszűrő feltételek</span>
+                                    <span class="lepes-opcionalis">(bal oldali hasáb felső része · nem kötelező)</span>
+                                    <div class="sugo-gomb-tarolo">
+                                        <button type="button" class="sugo-info-gomb" onclick="toggleSugoPopover(event, 'popover-sugo-3-1')" title="Súgó 3.1: Előszűrők" aria-label="Súgó 3.1: Előszűrők">ⓘ</button>
+                                        <div id="popover-sugo-3-1" class="sugo-popover">
+                                            <div class="sugo-popover-fejlec">
+                                                <span>📖 Súgó 3.1: Előszűrők</span>
+                                                <span class="sugo-popover-zar" onclick="closeSugoPopover('popover-sugo-3-1')">&times;</span>
+                                            </div>
+                                            <div class="sugo-popover-szoveg">
+                                                A bal oldali sáv tetején lévő előszűrők (Kiadás éve, Szerző, Folyóirat, Intézmény) még azelőtt elküldik a szűkítést az MTMT szervernek, mielőtt a maximum 2000 találat letöltődne. Ezzel megelőzhető, hogy a releváns cikkek kiszoruljanak a limitből. A mezők melletti <strong>🔍</strong> gombbal élő MTMT entitáskereső is használható.
+                                            </div>
+                                            <a href="sugo.html#sugo-3-1" target="_blank" class="sugo-popover-link">Súgó 3.1 fejezet megnyitása ↗</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="lepes-leiras">
+                                    Kérjük, adjon meg előszűrő feltételeket a bal oldali hasáb felső részén (Kiadás éve, Szerző, Folyóirat, Intézmény), amelyek közvetlenül a szerveroldali lekérést szűkítik.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- 2. Keresőkérdés -->
+                        <div class="alap-utmutato-lepes lepes-kiemelt">
+                            <div class="lepes-szam">2</div>
+                            <div class="lepes-tartalom">
+                                <div class="lepes-cimsor">
+                                    <span class="lepes-cim">Keresőkérdés megadása</span>
+                                    <span class="lepes-kotelezo">(fenti keresősáv · szükséges)</span>
+                                    <div class="sugo-gomb-tarolo">
+                                        <button type="button" class="sugo-info-gomb" onclick="toggleSugoPopover(event, 'popover-sugo-1-1')" title="Súgó 1.1: Egyszerű keresés" aria-label="Súgó 1.1: Egyszerű keresés">ⓘ</button>
+                                        <div id="popover-sugo-1-1" class="sugo-popover">
+                                            <div class="sugo-popover-fejlec">
+                                                <span>📖 Súgó 1.1: Egyszerű keresés operátorai</span>
+                                                <span class="sugo-popover-zar" onclick="closeSugoPopover('popover-sugo-1-1')">&times;</span>
+                                            </div>
+                                            <div class="sugo-popover-szoveg">
+                                                A megadott szavakat a rendszer minden metaadatban keresi:
+                                                <ul>
+                                                    <li><strong>ÉS (szóköz):</strong> szavankénti kötelező egyezés.</li>
+                                                    <li><strong>"Idézőjel":</strong> pontos kifejezés egybefüggően.</li>
+                                                    <li><strong>Csonkolás (*):</strong> szótő és ragozott alakok (pl. <code>polic*</code>).</li>
+                                                    <li><strong>Kizárás (-):</strong> szó elé tett mínuszjel (pl. <code>-közoktatás</code>).</li>
+                                                </ul>
+                                            </div>
+                                            <a href="sugo.html#sugo-1-1" target="_blank" class="sugo-popover-link">Súgó 1.1 fejezet megnyitása ↗</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="lepes-leiras">
+                                    Adja meg a keresőkérdést a fenti keresőmezőben: használhat szóközöket (logikai <em>ÉS</em> kapcsolat), <code>"pontos kifejezést"</code>, <code>csonkolást*</code> vagy <code>-kizárást</code>, majd kattintson a <strong>🔍 Keresés</strong> gombra.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- 3. Utólagos szűrők -->
+                        <div class="alap-utmutato-lepes">
+                            <div class="lepes-szam">3</div>
+                            <div class="lepes-tartalom">
+                                <div class="lepes-cimsor">
+                                    <span class="lepes-cim">Utólagos szűrőfeltételek</span>
+                                    <span class="lepes-opcionalis">(bal oldali hasáb alsó része · nem kötelező)</span>
+                                    <div class="sugo-gomb-tarolo">
+                                        <button type="button" class="sugo-info-gomb" onclick="toggleSugoPopover(event, 'popover-sugo-3-2')" title="Súgó 3.2: Dinamikus utószűkítés" aria-label="Súgó 3.2: Dinamikus utószűkítés">ⓘ</button>
+                                        <div id="popover-sugo-3-2" class="sugo-popover">
+                                            <div class="sugo-popover-fejlec">
+                                                <span>📖 Súgó 3.2: Dinamikus utószűkítés</span>
+                                                <span class="sugo-popover-zar" onclick="closeSugoPopover('popover-sugo-3-2')">&times;</span>
+                                            </div>
+                                            <div class="sugo-popover-szoveg">
+                                                A bal oldali sáv alsó felén lévő dobozok a már letöltött találatokon belül végeznek azonnali, böngésző memóriában futó szűrést (Év, Célcsoport, Típus, Besorolás, Nyelv). A fejlécben lévő legördülő menüvel megadható, hogy a bejelölt tételeket tartalmazza a találati lista, vagy kizárja azokat.
+                                            </div>
+                                            <a href="sugo.html#sugo-3-2" target="_blank" class="sugo-popover-link">Súgó 3.2 fejezet megnyitása ↗</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="lepes-leiras">
+                                    A találatok letöltése után tetszés szerint adhat meg utólagos szűrőfeltételeket is a bal hasáb alsó részén (Megjelenés éve, Célcsoport, Típus, Besorolás, Nyelv), amelyek azonnal, újratöltés nélkül szűrik a listát.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div id="halozati-talca" class="halozati-talca-kontener" style="display: none;">
@@ -318,15 +426,90 @@
         </div>
     </div>
 
+    <!-- FÁJLLETÖLTÉSI ÉS HELYI FUTTATÁSI MODÁL -->
+    <div id="letoltes-modal" class="modal-hatter" onclick="zardBeLetoltesModal(event)">
+        <div class="modal-tartalom" onclick="event.stopPropagation()" style="max-width: 650px;">
+            <div class="modal-fejlec" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                <h3 style="margin: 0; color: #004481; display: flex; align-items: center; gap: 8px;">
+                    <span>📥</span> M2-SZIK Fájlok letöltése &amp; Helyi futtatás
+                </h3>
+                <span onclick="document.getElementById('letoltes-modal').style.display='none'"
+                    style="color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; line-height: 1;">&times;</span>
+            </div>
+            <div style="font-size: 13.5px; color: #333; margin-top: 15px; line-height: 1.5;">
+                <div style="background-color: #e9f5ed; border-left: 4px solid #28a745; padding: 10px 14px; margin-bottom: 15px; border-radius: 4px;">
+                    <strong style="color: #155724;">💡 Jó tudni: Itt a webes felületen nem szükséges letölteni!</strong>
+                    <p style="margin: 4px 0 0 0; font-size: 12.5px; color: #2e663d;">
+                        A rendszer közvetlenül a böngészőből működik és élő kapcsolatban áll az MTMT v2 szerverével.
+                    </p>
+                </div>
+
+                <p>Ha a <strong>saját számítógépén offline</strong> szeretné futtatni (pl. pendrive-ról, dupla kattintással), töltse le az alábbi <strong>fájlokat ugyanabba a mappába</strong>:</p>
+
+                <div style="border: 1px solid #ddd; border-radius: 6px; overflow: hidden; margin: 15px 0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-bottom: 1px solid #eee; background: #fafafa;">
+                        <div>
+                            <strong>index.html</strong> <span style="font-size: 11px; background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 3px; font-weight: bold;">Szükséges</span>
+                            <div style="font-size: 12px; color: #666;">Fő alkalmazás (keresőmotor, előszűrők, exportálás)</div>
+                        </div>
+                        <a href="index.html" download="index.html" class="kicsi-gomb" style="background: #004481; color: white; text-decoration: none; padding: 6px 12px; font-weight: bold; border-radius: 4px;">📥 Mentés</a>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-bottom: 1px solid #eee; background: #fff;">
+                        <div>
+                            <strong>style.css</strong> <span style="font-size: 11px; background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 3px; font-weight: bold;">Szükséges</span>
+                            <div style="font-size: 12px; color: #666;">Klasszikus stíluslap és súgó popover elemek</div>
+                        </div>
+                        <a href="style.css" download="style.css" class="kicsi-gomb" style="background: #004481; color: white; text-decoration: none; padding: 6px 12px; font-weight: bold; border-radius: 4px;">📥 Mentés</a>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-bottom: 1px solid #eee; background: #fafafa;">
+                        <div>
+                            <strong>sugo.html</strong> <span style="font-size: 11px; background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 3px; font-weight: bold;">Szükséges</span>
+                            <div style="font-size: 12px; color: #666;">Módszertani útmutató és PRISMA protokoll leírás</div>
+                        </div>
+                        <a href="sugo.html" download="sugo.html" class="kicsi-gomb" style="background: #004481; color: white; text-decoration: none; padding: 6px 12px; font-weight: bold; border-radius: 4px;">📥 Mentés</a>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: #fff;">
+                        <div>
+                            <strong>szotar.html</strong> <span style="font-size: 11px; background: #f1f5f9; color: #475569; padding: 2px 6px; border-radius: 3px;">Opcionális</span>
+                            <div style="font-size: 12px; color: #666;">Saját tezaurusz és szinonima-szerkesztő</div>
+                        </div>
+                        <a href="szotar.html" download="szotar.html" class="kicsi-gomb" style="background: #004481; color: white; text-decoration: none; padding: 6px 12px; font-weight: bold; border-radius: 4px;">📥 Mentés</a>
+                    </div>
+                </div>
+
+                <div style="background-color: #fff8e6; border: 1px solid #ffeeba; padding: 10px 14px; border-radius: 4px; font-size: 12px; color: #7a5d00; margin-bottom: 8px;">
+                    <strong>🔍 Cím és Alcím keresési javítás:</strong><br>
+                    A keresőmotor mostantól a főcímet (<code>title</code>), az alcímet (<code>subTitle</code>) és a bibliográfiai címleírást (<code>label</code>) is együttesen vizsgálja. Így a <em>"systematic review"</em> jellegű kifejezések akkor is azonnal megjelennek, ha az MTMT rekordban a kifejezés az alcímben vagy egyéb címmezőben szerepel!
+                </div>
+
+                <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; padding: 10px 14px; border-radius: 4px; font-size: 12px; color: #166534;">
+                    <strong>⚡ MTMT Robotvédelem és intelligens lapozás:</strong><br>
+                    Az MTMT API 2024/2025-ös robotvédelmi szabályaihoz igazodva a letöltés automatikusan 50 vagy 100 rekordos biztonságos blokkokban lapozva történik. A felületen a kívánt célkorlát és a blokkméret szabadon állítható, a találati listában pedig gombnyomással tölthetők le a további oldalak.
+                </div>
+            </div>
+            <div style="text-align: right; margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px;">
+                <button type="button" onclick="document.getElementById('letoltes-modal').style.display='none'" class="kicsi-gomb" style="background: #6c757d; color: white; padding: 6px 14px; border: none; border-radius: 4px; cursor: pointer;">Bezárás</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        const LETOLTESI_LIMIT = 2000;
+        let lapozasiBlokkMeret = 100;
+        let celLetoltesiLimit = 1000;
         let aktualisTalalatok = [];
         let megjelenoTalalatok = [];
         let szerverOsszesTalalat = 0;
+        let betoltottOldalakSzama = 1;
+        let osszesSzerverOldalSzama = 1;
+        let aktivBaseUrls = [];
+        let ismertMtidSet = new Set();
+        let letoltesFolyamatban = false;
+        let megszakitasKerve = false;
         let betoltottSzurok = null;
         let ujRekordokDatumTol = null;
         let keresoMod = 'egyszeru';
         let aktualisModalSorId = null;
+        let aktualisRendezes = 'relevancia';
 
         function feldolgozSzotarat(nyersSzoveg) {
             let szotarKlaszterek = [];
@@ -356,9 +539,19 @@
             document.getElementById('mtmt-modal').style.display = 'none';
         }
 
+        function mutatLetoltesiSegedletet() {
+            const modal = document.getElementById('letoltes-modal');
+            if (modal) modal.style.display = 'block';
+        }
+
+        function zardBeLetoltesModal(event) {
+            const modal = document.getElementById('letoltes-modal');
+            if (modal) modal.style.display = 'none';
+        }
+
         function frissitGomb(selectElem, sorId) {
             const gomb = document.getElementById('gomb-' + sorId);
-            if (selectElem.value === 'label') {
+            if (selectElem.value === 'label' || selectElem.value === 'title') {
                 gomb.innerHTML = '💡 Javaslat';
                 gomb.title = 'Szinonimák javaslata';
             } else {
@@ -376,9 +569,55 @@
             }, 1000);
         }
 
+        function getMtmtApiBase() {
+            // Ha felhőben vagy helyi webkiszolgálón futunk (http vagy https protokoll):
+            // Elsőbbséget élvez a beépített /api/mtmt proxy, ami kivédi a szigorú böngészős CORS/tűzfal blokkolást
+            if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
+                return '/api/mtmt';
+            }
+            // Ha a felhasználó a saját gépéről, letöltött fájlként (file://) nyitja meg a felületet:
+            return 'https://m2.mtmt.hu/api';
+        }
+
+        async function fetchMtmt(urlPathAndQuery) {
+            const base = getMtmtApiBase();
+            let primaryUrl = urlPathAndQuery;
+            let fallbackUrl = urlPathAndQuery;
+
+            if (urlPathAndQuery.startsWith('http')) {
+                if (base === '/api/mtmt') {
+                    primaryUrl = urlPathAndQuery.replace('https://m2.mtmt.hu/api', '/api/mtmt');
+                    fallbackUrl = urlPathAndQuery;
+                } else {
+                    primaryUrl = urlPathAndQuery;
+                    fallbackUrl = urlPathAndQuery;
+                }
+            } else {
+                primaryUrl = `${base}${urlPathAndQuery.startsWith('/') ? '' : '/'}${urlPathAndQuery}`;
+                fallbackUrl = `https://m2.mtmt.hu/api${urlPathAndQuery.startsWith('/') ? '' : '/'}${urlPathAndQuery}`;
+            }
+
+            try {
+                let r = await fetch(primaryUrl);
+                if (r.ok) return r;
+                throw new Error(`HTTP ${r.status}`);
+            } catch (err) {
+                // Ha a proxy sikertelen vagy nem elérhető, próbáljuk közvetlenül az MTMT szerverét:
+                if (primaryUrl !== fallbackUrl) {
+                    try {
+                        let r2 = await fetch(fallbackUrl);
+                        if (r2.ok) return r2;
+                    } catch (err2) {
+                        throw err2;
+                    }
+                }
+                throw err;
+            }
+        }
+
         async function fetchAllPages(baseUrl) {
             try {
-                let r1 = await fetch(baseUrl + '&page=1');
+                let r1 = await fetchMtmt(baseUrl + '&page=1');
                 if (!r1.ok) return [];
                 let d1 = await r1.json();
                 let items = [];
@@ -386,15 +625,21 @@
 
                 let totalPages = d1.paging ? d1.paging.totalPages : 1;
                 if (totalPages > 1) {
-                    let maxPage = Math.min(totalPages, 50);
-                    let promisek = [];
-                    for (let i = 2; i <= maxPage; i++) {
-                        promisek.push(fetch(baseUrl + '&page=' + i).then(r => r.ok ? r.json() : { content: [] }));
+                    let maxPage = Math.min(totalPages, 20);
+                    for (let i = 2; i <= maxPage; i += 3) {
+                        let batch = [];
+                        for (let j = i; j < Math.min(i + 3, maxPage + 1); j++) {
+                            batch.push(
+                                fetchMtmt(baseUrl + '&page=' + j)
+                                    .then(r => r.ok ? r.json() : { content: [] })
+                                    .catch(() => ({ content: [] }))
+                            );
+                        }
+                        let resArr = await Promise.all(batch);
+                        resArr.forEach(res => {
+                            if (res && res.content) items.push(...res.content);
+                        });
                     }
-                    let resArr = await Promise.all(promisek);
-                    resArr.forEach(res => {
-                        if (res && res.content) items.push(...res.content);
-                    });
                 }
                 return items;
             } catch (e) {
@@ -435,12 +680,12 @@
                 let cacheBuster = Date.now();
                 let encNev = encodeURIComponent(tisztaNev);
 
-                let url1 = `https://m2.mtmt.hu/api/${vegpont}/?size=2000&format=json&cond=label;any;${encNev}&_t=${cacheBuster}`;
+                let url1 = `https://m2.mtmt.hu/api/${vegpont}/?size=100&format=json&cond=label;any;${encNev}&_t=${cacheBuster}`;
                 let p1 = fetchAllPages(url1);
 
                 let p2 = Promise.resolve([]);
                 if (vegpont === 'periodical') {
-                    let url2 = `https://m2.mtmt.hu/api/${vegpont}/?size=2000&format=json&cond=title;eq;${encNev}&_t=${cacheBuster}`;
+                    let url2 = `https://m2.mtmt.hu/api/${vegpont}/?size=100&format=json&cond=title;eq;${encNev}&_t=${cacheBuster}`;
                     p2 = fetchAllPages(url2);
                 }
 
@@ -627,9 +872,10 @@
         }
 
         function pontosKereses(szoveg, szo) {
+            if (!szoveg || !szo) return false;
             let reszlegesVegen = szo.endsWith('*');
             let tisztaSzo = reszlegesVegen ? szo.slice(0, -1) : szo;
-            let escaped = tisztaSzo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            let escaped = tisztaSzo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/[-\s]+/g, '[-\\s]+');
             let minta = '(^|[^a-záéíóöőúüűA-ZÁÉÍÓÖŐÚÜŰ0-9])' + escaped;
 
             if (!reszlegesVegen) {
@@ -639,13 +885,366 @@
             return regex.test(szoveg);
         }
 
+        // =========================================================================
+        // KÖZLEMÉNY ÉS FOLYÓIRAT RELEVANCIA MOTOR (calcPublicationRelevance)
+        // =========================================================================
+        function calcPublicationRelevance(pub, keresettKifejezes, tartalmazza, kizarja, osszetettBlokkok, kizarandoSzavak) {
+            // Szigorú kizárás: csak idéző közlemények kizárása a találatokból (citation === true && core !== true)
+            // A befoglalók (core!=true, citation!=true) és a forrás+idézők (core==true, citation==true) nem záródnak ki!
+            if (isCsakIdezo(pub)) {
+                return {
+                    score: 0,
+                    percent: 0,
+                    kizart: true,
+                    reason: 'Kizárva: szigorúan csak idéző közlemény (nem hitelesített forrás)',
+                    hasQuery: true,
+                    matchedKeywords: []
+                };
+            }
+
+            let titleClean = (pub.title || "").trim();
+            let subTitleClean = (pub.subTitle || "").trim();
+            let fullTitleClean = [titleClean, subTitleClean].filter(Boolean).join(" ");
+            let journalClean = (pub.journal ? (pub.journal.title || (pub.journal.label ? pub.journal.label.replace(/\s?[0-9]{4}-[0-9]{3}[0-9xX]/g, '').trim() : '')) : "").trim();
+            let labelClean = (pub.label || "").trim();
+            let commentClean = (pub.comment || "").trim();
+
+            let titleLower = titleClean.toLowerCase();
+            let subTitleLower = subTitleClean.toLowerCase();
+            let fullTitleLower = fullTitleClean.toLowerCase();
+            let journalLower = journalClean.toLowerCase();
+            let labelLower = labelClean.toLowerCase();
+            let fullTextLower = [titleLower, subTitleLower, journalLower, labelLower, commentClean.toLowerCase()].filter(Boolean).join(" ");
+
+            // 1. Kizárások ellenőrzése
+            let kizaroLista = [];
+            if (kizarja && kizarja.length > 0) kizaroLista.push(...kizarja);
+            if (kizarandoSzavak && kizarandoSzavak.length > 0) kizaroLista.push(...kizarandoSzavak);
+
+            for (let k of kizaroLista) {
+                if (!k) continue;
+                let tisztaK = k.replace(/^["']|["']$/g, '').trim().toLowerCase();
+                if (tisztaK && fullTextLower.includes(tisztaK)) {
+                    return {
+                        score: 0,
+                        percent: 0,
+                        kizart: true,
+                        reason: `Kizárva a(z) "${tisztaK}" kifejezés miatt`,
+                        hasQuery: true,
+                        matchedKeywords: []
+                    };
+                }
+            }
+
+            // 2. Keresőkifejezések és tokenek kinyerése
+            let kifejezesek = [];
+            if (keresoMod === 'egyszeru') {
+                if (tartalmazza && tartalmazza.length > 0) {
+                    kifejezesek = [...tartalmazza];
+                }
+            } else if (keresoMod === 'osszetett') {
+                if (osszetettBlokkok && osszetettBlokkok.length > 0) {
+                    osszetettBlokkok.forEach(b => {
+                        b.forEach(item => {
+                            if (item.szo) kifejezesek.push(item.szo);
+                        });
+                    });
+                }
+            }
+
+            // Ha nincs szöveges keresési feltétel:
+            if (kifejezesek.length === 0 && (!keresettKifejezes || keresettKifejezes.trim() === '')) {
+                return {
+                    score: 100,
+                    percent: 100,
+                    kizart: false,
+                    reason: 'Általános találati lista (nincs szöveges szűrés)',
+                    hasQuery: false,
+                    matchedKeywords: []
+                };
+            }
+
+            let rawQuery = (keresettKifejezes || kifejezesek.join(' ')).trim().toLowerCase();
+            let rawQueryClean = rawQuery.replace(/["'*]/g, '').trim();
+
+            let tokens = [];
+            kifejezesek.forEach(k => {
+                let t = k.replace(/^["']|["']$/g, '').trim().toLowerCase();
+                if (t) {
+                    tokens.push(t);
+                    t.split(/\s+/).forEach(w => {
+                        let wClean = w.replace(/["'*]/g, '').trim();
+                        if (wClean.length > 1 && !tokens.includes(wClean)) tokens.push(wClean);
+                    });
+                }
+            });
+            if (rawQueryClean && !tokens.includes(rawQueryClean)) {
+                tokens.unshift(rawQueryClean);
+            }
+
+            let matchedKeywords = [];
+            tokens.forEach(tok => {
+                if (fullTextLower.includes(tok) && !matchedKeywords.includes(tok)) {
+                    matchedKeywords.push(tok);
+                }
+            });
+
+            let alapPont = 0;
+            let reason = "";
+
+            // --- TIER 1: PONTOS ÉS EGYBEFÜGGŐ CÍM / ALCÍM EGYEZÉSEK (80 - 100 PONT) ---
+            if (rawQueryClean && (titleLower === rawQueryClean || fullTitleLower === rawQueryClean)) {
+                alapPont = 100;
+                reason = "🎯 Tökéletes címegyezés";
+            } else if (rawQueryClean && (titleLower.startsWith(rawQueryClean) || fullTitleLower.startsWith(rawQueryClean))) {
+                alapPont = 95;
+                reason = "📌 A főcím a keresett kifejezéssel kezdődik";
+            } else if (rawQueryClean && subTitleLower === rawQueryClean) {
+                alapPont = 90;
+                reason = "🎯 Tökéletes alcímegyezés";
+            } else if (rawQueryClean && subTitleLower.startsWith(rawQueryClean)) {
+                alapPont = 88;
+                reason = "📌 Az alcím a kifejezéssel kezdődik";
+            } else if (rawQueryClean && titleLower.includes(rawQueryClean)) {
+                alapPont = 85;
+                reason = "✨ Kifejezés egybefüggően a főcímben";
+            } else if (rawQueryClean && subTitleLower.includes(rawQueryClean)) {
+                alapPont = 80;
+                reason = "📑 Kifejezés egybefüggően az alcímben";
+            }
+
+            // --- TIER 2: TÖBBSZAVAS ÉS KULCSSZÓ LEFEDETTSÉG (40 - 79 PONT) ---
+            let titleMatchCount = 0;
+            let titleOrSubMatchCount = 0;
+            let fullMatchCount = 0;
+
+            tokens.forEach(tok => {
+                let inTitle = titleLower.includes(tok);
+                let inSub = subTitleLower.includes(tok);
+                let inFull = fullTextLower.includes(tok);
+
+                if (inTitle) titleMatchCount++;
+                if (inTitle || inSub) titleOrSubMatchCount++;
+                if (inFull) fullMatchCount++;
+            });
+
+            let totalTokens = Math.max(1, tokens.length);
+            let fullRatio = fullMatchCount / totalTokens;
+            let titleRatio = titleOrSubMatchCount / totalTokens;
+
+            if (fullRatio === 1) {
+                if (titleMatchCount === totalTokens) {
+                    if (alapPont < 78) {
+                        alapPont = 78;
+                        reason = "🔍 Minden keresőszó szerepel a főcímben";
+                    }
+                } else if (titleOrSubMatchCount === totalTokens) {
+                    if (alapPont < 74) {
+                        alapPont = 74;
+                        reason = "📝 Minden keresőszó a címben vagy alcímben";
+                    }
+                } else if (titleOrSubMatchCount > 0) {
+                    if (alapPont < 62) {
+                        alapPont = 62;
+                        reason = "📖 Keresőszavak a címben és a leírásban";
+                    }
+                }
+            } else if (fullRatio > 0 && titleOrSubMatchCount > 0) {
+                let partialScore = Math.round(fullRatio * 45);
+                if (titleRatio > 0) {
+                    partialScore += Math.round(titleRatio * 15);
+                }
+                if (partialScore > alapPont) {
+                    alapPont = partialScore;
+                    reason = `🔎 ${fullMatchCount}/${totalTokens} kulcsszó egyezés`;
+                }
+            }
+
+            // --- TIER 3: FOLYÓIRAT / CITATION LABEL EGYEZÉS (20 - 50 PONT) ---
+            if (rawQueryClean && journalLower.includes(rawQueryClean)) {
+                if (alapPont < 50) {
+                    alapPont = 50;
+                    reason = "📚 Folyóiratcím egyezés";
+                }
+            } else if (rawQueryClean && labelLower.includes(rawQueryClean)) {
+                if (alapPont < 35) {
+                    alapPont = 35;
+                    reason = "📄 Bibliográfiai leírás egyezés";
+                }
+            }
+
+            if (alapPont === 0 && rawQueryClean && fullTextLower.includes(rawQueryClean)) {
+                alapPont = 25;
+                reason = "Szöveges egyezés egyéb metaadatokban";
+            }
+
+            // Ha egyetlen keresőszó sem egyezik:
+            if (matchedKeywords.length === 0 && alapPont === 0) {
+                return {
+                    score: 0,
+                    percent: 0,
+                    reason: "Nincs egyezés a keresési feltételekre",
+                    kizart: false,
+                    hasQuery: true,
+                    matchedKeywords: []
+                };
+            }
+
+            // --- TIER 4: TUDOMÁNYOS MINŐSÉGI BÓNUSZOK ---
+            let bonus = 0;
+            let allapot = getPubAllapot(pub);
+            if (pub.core === true || allapot === 'Forrásközlemény') {
+                bonus += 4;
+            }
+            let citCount = pub.citationCount || (pub.citations && pub.citations.total) || 0;
+            if (citCount > 0) {
+                bonus += Math.min(6, Math.round(Math.log2(citCount + 1)));
+            }
+            let curYear = new Date().getFullYear();
+            let pubYear = pub.publishedYear || 0;
+            if (pubYear >= curYear - 3) bonus += 2;
+            else if (pubYear >= curYear - 7) bonus += 1;
+
+            let finalScore = Math.min(100, alapPont + bonus);
+
+            return {
+                score: finalScore,
+                percent: finalScore,
+                reason: reason || "Keresési egyezés",
+                kizart: false,
+                hasQuery: true,
+                matchedKeywords: matchedKeywords
+            };
+        }
+
+        function getAktivKeresoKifejezesek() {
+            let tomb = [];
+            if (keresoMod === 'egyszeru') {
+                const elem = document.getElementById('keresoszoveg');
+                const beirt = elem ? elem.value.trim() : '';
+                if (beirt) {
+                    let okos = okosKeresoFeldolgozo(beirt);
+                    tomb.push(...okos.tartalmazza);
+                    beirt.split(/\s+/).forEach(s => {
+                        let c = s.replace(/["'*]/g, '').trim();
+                        if (c.length > 2 && !tomb.includes(c)) tomb.push(c);
+                    });
+                }
+            } else if (keresoMod === 'osszetett') {
+                let blokkok = getOsszetettFeltetelek();
+                blokkok.forEach(b => {
+                    b.forEach(item => {
+                        if (item.szo) {
+                            let c = item.szo.replace(/\[.*?\]/g, '').replace(/["'*]/g, '').trim();
+                            if (c.length > 1) tomb.push(c);
+                        }
+                    });
+                });
+            }
+            return Array.from(new Set(tomb));
+        }
+
+        function kiemelKeresoszavakat(szoveg, kifejezesek) {
+            if (!szoveg || !kifejezesek || kifejezesek.length === 0) return szoveg || '';
+            let eredmeny = szoveg;
+            kifejezesek.forEach(k => {
+                let tiszta = k.replace(/^["']|["']$/g, '').replace(/\*/g, '').trim();
+                if (tiszta.length < 2) return;
+                let escaped = tiszta.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                try {
+                    let re = new RegExp(`(${escaped})`, 'gi');
+                    eredmeny = eredmeny.replace(re, '<mark style="background-color: #fef08a; color: #1e293b; padding: 1px 3px; border-radius: 2px; font-weight: 600;">$1</mark>');
+                } catch (e) {}
+            });
+            return eredmeny;
+        }
+
+        function getElsoSzerzo(pub) {
+            if (pub.authorships && pub.authorships.length > 0) {
+                let a = pub.authorships[0];
+                if (a.author && a.author.label) return a.author.label;
+                if (a.familyName) return a.familyName + " " + (a.givenName || "");
+            }
+            return "";
+        }
+
+        function rendezTalalatokat(tomb, szempont) {
+            return [...tomb].sort((a, b) => {
+                if (szempont === 'relevancia') {
+                    let scoreA = (a._relevance && a._relevance.score !== undefined) ? a._relevance.score : 0;
+                    let scoreB = (b._relevance && b._relevance.score !== undefined) ? b._relevance.score : 0;
+                    if (scoreA !== scoreB) return scoreB - scoreA;
+                    let evA = a.publishedYear || 0;
+                    let evB = b.publishedYear || 0;
+                    if (evA !== evB) return evB - evA;
+                    let citA = a.citationCount || (a.citations && a.citations.total) || 0;
+                    let citB = b.citationCount || (b.citations && b.citations.total) || 0;
+                    if (citA !== citB) return citB - citA;
+                    return (a.title || '').localeCompare(b.title || '', 'hu');
+                } else if (szempont === 'ev_csokk') {
+                    let evA = a.publishedYear || 0;
+                    let evB = b.publishedYear || 0;
+                    if (evA !== evB) return evB - evA;
+                    let scoreA = (a._relevance && a._relevance.score !== undefined) ? a._relevance.score : 0;
+                    let scoreB = (b._relevance && b._relevance.score !== undefined) ? b._relevance.score : 0;
+                    return scoreB - scoreA;
+                } else if (szempont === 'ev_nov') {
+                    let evA = a.publishedYear || 9999;
+                    let evB = b.publishedYear || 9999;
+                    if (evA !== evB) return evA - evB;
+                    return (a.title || '').localeCompare(b.title || '', 'hu');
+                } else if (szempont === 'idezett') {
+                    let citA = (a.citationCount !== undefined && a.citationCount !== null) ? a.citationCount : ((a.citations && a.citations.total) || 0);
+                    let citB = (b.citationCount !== undefined && b.citationCount !== null) ? b.citationCount : ((b.citations && b.citations.total) || 0);
+                    if (citA !== citB) return citB - citA;
+                    let indA = a.independentCitationCount || 0;
+                    let indB = b.independentCitationCount || 0;
+                    if (indA !== indB) return indB - indA;
+                    return (b.publishedYear || 0) - (a.publishedYear || 0);
+                } else if (szempont === 'idezett_fuggetlen') {
+                    let indA = (a.independentCitationCount !== undefined && a.independentCitationCount !== null) ? a.independentCitationCount : (a.citationCount || 0);
+                    let indB = (b.independentCitationCount !== undefined && b.independentCitationCount !== null) ? b.independentCitationCount : (b.citationCount || 0);
+                    if (indA !== indB) return indB - indA;
+                    let citA = (a.citationCount !== undefined && a.citationCount !== null) ? a.citationCount : 0;
+                    let citB = (b.citationCount !== undefined && b.citationCount !== null) ? b.citationCount : 0;
+                    if (citA !== citB) return citB - citA;
+                    return (b.publishedYear || 0) - (a.publishedYear || 0);
+                } else if (szempont === 'cim_abc') {
+                    return (a.title || '').localeCompare(b.title || '', 'hu');
+                } else if (szempont === 'szerzo_abc') {
+                    let szA = getElsoSzerzo(a);
+                    let szB = getElsoSzerzo(b);
+                    return szA.localeCompare(szB, 'hu');
+                }
+                return 0;
+            });
+        }
+
+        function valtsRendezest(ujRendezes) {
+            aktualisRendezes = ujRendezes;
+            kliensSzures();
+        }
+
         function valtasKeresoMod(ujMod) {
             keresoMod = ujMod;
             document.querySelectorAll('.mod-gomb').forEach(g => g.classList.remove('aktiv'));
-            document.getElementById('gomb-' + ujMod).classList.add('aktiv');
+            const aktivGomb = document.getElementById('gomb-' + ujMod);
+            if (aktivGomb) {
+                aktivGomb.classList.add('aktiv');
+            }
 
-            document.getElementById('normal-kereso-sav').style.display = (ujMod === 'egyszeru') ? "flex" : "none";
-            document.getElementById('osszetett-panel').style.display = (ujMod === 'osszetett') ? "block" : "none";
+            const normalKontener = document.getElementById('normal-kereso-kontener');
+            if (normalKontener) {
+                normalKontener.style.display = (ujMod === 'egyszeru') ? "block" : "none";
+            }
+            const normalSav = document.getElementById('normal-kereso-sav');
+            if (normalSav) {
+                normalSav.style.display = (ujMod === 'egyszeru') ? "flex" : "none";
+            }
+            const osszetettPanel = document.getElementById('osszetett-panel');
+            if (osszetettPanel) {
+                osszetettPanel.style.display = (ujMod === 'osszetett') ? "block" : "none";
+            }
 
             if (ujMod === 'osszetett') {
                 if (document.getElementById('osszetett-sorok-tarolo').children.length === 0) {
@@ -657,6 +1256,11 @@
             // Mindig szinkronizáljuk a tokeneket módváltáskor
             if (typeof frissitBeemeltEloszurok === 'function') {
                 frissitBeemeltEloszurok();
+            }
+
+            // Ha még nincs találati lista a képernyőn, a kezdő útmutatót az új módhoz igazítjuk
+            if (!aktualisTalalatok || aktualisTalalatok.length === 0) {
+                frissitAlapUzenet(ujMod);
             }
         }
 
@@ -677,6 +1281,7 @@
                                     
                                     <select id="select-${sorId}" class="mezovallaszto" style="padding: 5px; font-size: 11px; border: 1px solid #ccc; border-radius: 3px;" onchange="frissitGomb(this, '${sorId}')">
                                         <option value="label" ${alapMezo === 'label' ? 'selected' : ''}>Minden metaadat</option>
+                                        <option value="title" ${alapMezo === 'title' ? 'selected' : ''}>Cím és alcím</option>
                                         <option value="author" ${alapMezo === 'author' ? 'selected' : ''}>Szerző (azonosított)</option>
                                         <option value="journal" ${alapMezo === 'journal' ? 'selected' : ''}>Folyóirat, sorozat</option>
                                         <option value="institute" ${alapMezo === 'institute' ? 'selected' : ''}>Intézmény (előd/alintézm.)</option>
@@ -721,15 +1326,31 @@
                 });
                 eredmeny = ujEredmeny;
             }
+            // Biztonsági korlát az MTMT robotvédelem miatt (max 24 ág egy menetben)
+            if (eredmeny.length > 24) {
+                console.warn(`Túl sok kombináció (${eredmeny.length}), első 24 ág feldolgozása a szerver védelmében.`);
+                eredmeny = eredmeny.slice(0, 24);
+            }
             return eredmeny;
         }
 
+        /**
+         * Szigorúan ellenőrzi, hogy a rekord csak idéző-e.
+         * Szabályok:
+         * - pub.citation === true ÉS pub.core !== true: Szigorúan csak idéző közlemény -> KIZÁRANDÓ!
+         * - pub.core === true: Magyar szerző ellenőrzött forrásközleménye (ha idézőként is szerepel) -> MEGTARTANDÓ!
+         * - pub.core !== true ÉS pub.citation !== true: Befoglaló kötet/kiadvány -> MEGTARTANDÓ!
+         */
+        function isCsakIdezo(pub) {
+            if (!pub) return false;
+            return pub.citation === true && pub.core !== true;
+        }
+
         function getPubAllapot(pub) {
-            let isCore = pub.core === true;
-            let isCitation = pub.citation === true;
-            if (isCore || (!isCore && !isCitation)) return "Forrásközlemény";
-            if (!isCore && isCitation) return "Idéző közlemény";
-            return "Egyéb / Ismeretlen";
+            if (!pub) return "Ismeretlen";
+            if (pub.core === true) return "Forrásközlemény";
+            if (pub.citation === true && pub.core !== true) return "Idéző közlemény";
+            return "Befoglaló közlemény";
         }
 
         function okosKeresoFeldolgozo(szoveg) {
@@ -751,15 +1372,396 @@
             return { tartalmazza, kizarja };
         }
 
+        // =========================================================================
+        // TUDOMÁNYOS HELYESÍRÁS-JAVÍTÓ ÉS ELÍRÁS-FELISMERŐ (pl. sysematic -> systematic)
+        // =========================================================================
+        const TUDOMANYOS_HELYESIRAS_SZOTAR = [
+            'systematic', 'review', 'analysis', 'meta-analysis', 'clinical',
+            'research', 'medicine', 'artificial', 'intelligence', 'algorithm',
+            'literature', 'methodology', 'psychology', 'intervention', 'evaluation',
+            'treatment', 'management', 'prevention', 'diagnosis', 'evidence'
+        ];
+
+        const ISMERT_ELIRASOK = {
+            'sysematic': 'systematic',
+            'sysetmatic': 'systematic',
+            'systemtic': 'systematic',
+            'systemaic': 'systematic',
+            'sytematic': 'systematic',
+            'reivew': 'review',
+            'reveiw': 'review',
+            'revew': 'review',
+            'analisis': 'analysis',
+            'analysys': 'analysis',
+            'alghoritm': 'algorithm',
+            'algoritm': 'algorithm',
+            'artifical': 'artificial',
+            'artifitial': 'artificial',
+            'intelegence': 'intelligence',
+            'inteligence': 'intelligence',
+            'clincal': 'clinical',
+            'cllinical': 'clinical',
+            'reserch': 'research',
+            'resarch': 'research',
+            'medecine': 'medicine'
+        };
+
+        function szamitsLevenshteinTavolsag(a, b) {
+            const m = a.length, n = b.length;
+            const d = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+            for (let i = 0; i <= m; i++) d[i][0] = i;
+            for (let j = 0; j <= n; j++) d[0][j] = j;
+            for (let i = 1; i <= m; i++) {
+                for (let j = 1; j <= n; j++) {
+                    const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+                    d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + cost);
+                }
+            }
+            return d[m][n];
+        }
+
+        function javasolHelyesirast(szoveg) {
+            if (!szoveg || !szoveg.trim()) return null;
+            let szavak = szoveg.split(/\s+/);
+            let voltModositas = false;
+
+            let javitottSzavak = szavak.map(szo => {
+                let tiszta = szo.replace(/[^a-zA-ZáéíóöőúüűÁÉÍÓÖŐÚÜŰ-]/g, '').toLowerCase();
+                if (!tiszta || tiszta.length < 3) return szo;
+
+                if (ISMERT_ELIRASOK[tiszta]) {
+                    voltModositas = true;
+                    return szo.toLowerCase().replace(tiszta, ISMERT_ELIRASOK[tiszta]);
+                }
+
+                for (let cel of TUDOMANYOS_HELYESIRAS_SZOTAR) {
+                    if (tiszta !== cel && szamitsLevenshteinTavolsag(tiszta, cel) <= 2 && tiszta.length >= 5) {
+                        voltModositas = true;
+                        return szo.toLowerCase().replace(tiszta, cel);
+                    }
+                }
+                return szo;
+            });
+
+            return voltModositas ? javitottSzavak.join(' ') : null;
+        }
+
+        function futtassJavithatottKeresest(javitottSzoveg) {
+            const inputElem = document.getElementById('keresoszoveg');
+            if (inputElem) {
+                inputElem.value = javitottSzoveg;
+            }
+            const javaslatDiv = document.getElementById('kereses-helyesiras-javaslat');
+            if (javaslatDiv) javaslatDiv.style.display = 'none';
+            szerverKereses();
+        }
+
+        function getNincsTalalatHTML(beirtKeresoSzoveg) {
+            let javaslat = javasolHelyesirast(beirtKeresoSzoveg);
+            let javaslatHTML = "";
+            if (javaslat) {
+                javaslatHTML = `
+                    <div style="background-color: #f0fdf4; border: 1.5px solid #86efac; border-radius: 8px; padding: 16px 20px; margin: 15px 0; text-align: left; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
+                        <div style="display: flex; align-items: flex-start; gap: 12px;">
+                            <div style="font-size: 26px; line-height: 1;">💡</div>
+                            <div style="flex-grow: 1;">
+                                <h4 style="margin: 0 0 6px 0; color: #166534; font-size: 15px; font-weight: bold;">
+                                    Elírás észlelve: Erre a kifejezésre gondolt?
+                                </h4>
+                                <p style="margin: 0 0 10px 0; font-size: 13.5px; color: #1e293b;">
+                                    A beírt <strong>"${beirtKeresoSzoveg}"</strong> helyett valószínűleg a(z) <strong style="color: #004481; font-size: 14.5px;">"${javaslat}"</strong> szakszót kereste (pl. hiányzó 't' betű a "systematic" szóban).
+                                </p>
+                                <button type="button" onclick="futtassJavithatottKeresest('${javaslat}')" class="kicsi-gomb" style="background-color: #004481; color: white; border: none; padding: 8px 16px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;">
+                                    <span>🔍</span> Keresés indítása: "${javaslat}" &rarr;
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            return `
+                <div style="background-color: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 24px; text-align: center; margin: 15px 0;">
+                    <div style="font-size: 36px; margin-bottom: 10px;">🔍</div>
+                    <h3 style="margin: 0 0 8px 0; font-size: 16px; color: #1e293b;">Nincs találat a megadott feltételekre</h3>
+                    <p style="margin: 0 0 14px 0; font-size: 13px; color: #64748b;">
+                        A keresett kifejezésre: <strong>"${beirtKeresoSzoveg || 'Nincs megadva'}"</strong> nem található érvényes forrásrekord az MTMT-ben.
+                    </p>
+                    ${javaslatHTML}
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 14px 18px; text-align: left; font-size: 13px; color: #334155; margin-top: 14px;">
+                        <h5 style="margin: 0 0 8px 0; color: #004481; font-size: 13.5px; font-weight: bold;">
+                            ℹ️ Tudnivalók az MTMT cím és alcím kereséséről:
+                        </h5>
+                        <ul style="margin: 0; padding-left: 20px; line-height: 1.6; font-size: 12.5px;">
+                            <li>A keresőmotor a <strong>főcímet (title)</strong>, az <strong>alcímet (subTitle)</strong> és a <strong>bibliográfiai leírást (label)</strong> együttesen vizsgálja az MTMT adatbázisában.</li>
+                            <li>A helyes <code>"systematic review"</code> kifejezésre <strong>több mint 5000 találat</strong> található az MTMT-ben, amelyek közül több száz közleménynél a kifejezés kifejezetten az alcímben szerepel!</li>
+                            <li>A rendszer kizárja a szigorúan csak idézőként szereplő publikációkat (citation=true, core!=true), így csak a hiteles forrásközlemények jelennek meg.</li>
+                        </ul>
+                    </div>
+                    <div style="margin-top: 16px;">
+                        <button type="button" onclick="ujKereses()" class="kicsi-gomb" style="background: #64748b; color: white; border: none; padding: 7px 16px; border-radius: 4px; font-weight: bold; cursor: pointer;">
+                            🔄 Új keresés
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
         function uresSzurok() {
             const alapUzenet = '<p class="alap-uzenet">Várja az adatokat...</p>';
             if (document.getElementById('ev-lista')) document.getElementById('ev-lista').innerHTML = alapUzenet;
-            if (document.getElementById('allapot-lista')) document.getElementById('allapot-lista').innerHTML = alapUzenet;
             if (document.getElementById('jelleg-lista')) document.getElementById('jelleg-lista').innerHTML = alapUzenet;
             if (document.getElementById('tipus-lista')) document.getElementById('tipus-lista').innerHTML = alapUzenet;
             if (document.getElementById('besorolas-lista')) document.getElementById('besorolas-lista').innerHTML = alapUzenet;
             if (document.getElementById('nyelv-lista')) document.getElementById('nyelv-lista').innerHTML = alapUzenet;
         }
+
+        // =========================================================================
+        // KEZDŐ ÚTMUTATÓ WORKFLOW ÉS SÚGÓ POPOVER MEGJELENÍTÉS
+        // =========================================================================
+        function getAlapUzenetHTML(mod = keresoMod) {
+            if (mod === 'egyszeru') {
+                return `
+                <div class="alap-utmutato-kontener" id="kezdo-utmutato-egyszeru">
+                    <div class="alap-utmutato-fejlec">
+                        <div class="utmutato-ikon">💡</div>
+                        <div>
+                            <h3>Keresés menete az MTMT-ben (Egyszerű keresés)</h3>
+                            <p>Kövesse az alábbi három logikus lépést a releváns szakirodalom felkutatásához:</p>
+                        </div>
+                    </div>
+                    <div class="alap-utmutato-lepesek">
+                        <!-- 1. Előszűrők -->
+                        <div class="alap-utmutato-lepes">
+                            <div class="lepes-szam">1</div>
+                            <div class="lepes-tartalom">
+                                <div class="lepes-cimsor">
+                                    <span class="lepes-cim">Előszűrő feltételek</span>
+                                    <span class="lepes-opcionalis">(bal oldali hasáb felső része · nem kötelező)</span>
+                                    <div class="sugo-gomb-tarolo">
+                                        <button type="button" class="sugo-info-gomb" onclick="toggleSugoPopover(event, 'popover-sugo-3-1')" title="Súgó 3.1: Előszűrők" aria-label="Súgó 3.1: Előszűrők">ⓘ</button>
+                                        <div id="popover-sugo-3-1" class="sugo-popover">
+                                            <div class="sugo-popover-fejlec">
+                                                <span>📖 Súgó 3.1: Előszűrők</span>
+                                                <span class="sugo-popover-zar" onclick="closeSugoPopover('popover-sugo-3-1')">&times;</span>
+                                            </div>
+                                            <div class="sugo-popover-szoveg">
+                                                A bal oldali sáv tetején lévő előszűrők (Kiadás éve, Szerző, Folyóirat, Intézmény) még azelőtt elküldik a szűkítést az MTMT szervernek, mielőtt a maximum 2000 találat letöltődne. Ezzel megelőzhető, hogy a releváns cikkek kiszoruljanak a limitből. A mezők melletti <strong>🔍</strong> gombbal élő MTMT entitáskereső is használható.
+                                            </div>
+                                            <a href="sugo.html#sugo-3-1" target="_blank" class="sugo-popover-link">Súgó 3.1 fejezet megnyitása ↗</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="lepes-leiras">
+                                    Kérjük, adjon meg előszűrő feltételeket a bal oldali hasáb felső részén (Kiadás éve, Szerző, Folyóirat, Intézmény), amelyek közvetlenül a szerveroldali lekérést szűkítik.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- 2. Keresőkérdés -->
+                        <div class="alap-utmutato-lepes lepes-kiemelt">
+                            <div class="lepes-szam">2</div>
+                            <div class="lepes-tartalom">
+                                <div class="lepes-cimsor">
+                                    <span class="lepes-cim">Keresőkérdés megadása</span>
+                                    <span class="lepes-kotelezo">(fenti keresősáv · szükséges)</span>
+                                    <div class="sugo-gomb-tarolo">
+                                        <button type="button" class="sugo-info-gomb" onclick="toggleSugoPopover(event, 'popover-sugo-1-1')" title="Súgó 1.1: Egyszerű keresés" aria-label="Súgó 1.1: Egyszerű keresés">ⓘ</button>
+                                        <div id="popover-sugo-1-1" class="sugo-popover">
+                                            <div class="sugo-popover-fejlec">
+                                                <span>📖 Súgó 1.1: Egyszerű keresés operátorai</span>
+                                                <span class="sugo-popover-zar" onclick="closeSugoPopover('popover-sugo-1-1')">&times;</span>
+                                            </div>
+                                            <div class="sugo-popover-szoveg">
+                                                A megadott szavakat a rendszer minden metaadatban keresi:
+                                                <ul>
+                                                    <li><strong>ÉS (szóköz):</strong> szavankénti kötelező egyezés.</li>
+                                                    <li><strong>"Idézőjel":</strong> pontos kifejezés egybefüggően.</li>
+                                                    <li><strong>Csonkolás (*):</strong> szótő és ragozott alakok (pl. <code>polic*</code>).</li>
+                                                    <li><strong>Kizárás (-):</strong> szó elé tett mínuszjel (pl. <code>-közoktatás</code>).</li>
+                                                </ul>
+                                            </div>
+                                            <a href="sugo.html#sugo-1-1" target="_blank" class="sugo-popover-link">Súgó 1.1 fejezet megnyitása ↗</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="lepes-leiras">
+                                    Adja meg a keresőkérdést a fenti keresőmezőben: használhat szóközöket (logikai <em>ÉS</em> kapcsolat), <code>"pontos kifejezést"</code>, <code>csonkolást*</code> vagy <code>-kizárást</code>, majd kattintson a <strong>🔍 Keresés</strong> gombra.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- 3. Utólagos szűrők -->
+                        <div class="alap-utmutato-lepes">
+                            <div class="lepes-szam">3</div>
+                            <div class="lepes-tartalom">
+                                <div class="lepes-cimsor">
+                                    <span class="lepes-cim">Utólagos szűrőfeltételek</span>
+                                    <span class="lepes-opcionalis">(bal oldali hasáb alsó része · nem kötelező)</span>
+                                    <div class="sugo-gomb-tarolo">
+                                        <button type="button" class="sugo-info-gomb" onclick="toggleSugoPopover(event, 'popover-sugo-3-2')" title="Súgó 3.2: Dinamikus utószűkítés" aria-label="Súgó 3.2: Dinamikus utószűkítés">ⓘ</button>
+                                        <div id="popover-sugo-3-2" class="sugo-popover">
+                                            <div class="sugo-popover-fejlec">
+                                                <span>📖 Súgó 3.2: Dinamikus utószűkítés</span>
+                                                <span class="sugo-popover-zar" onclick="closeSugoPopover('popover-sugo-3-2')">&times;</span>
+                                            </div>
+                                            <div class="sugo-popover-szoveg">
+                                                A bal oldali sáv alsó felén lévő dobozok a már letöltött találatokon belül végeznek azonnali, böngésző memóriában futó szűrést (Év, Célcsoport, Típus, Besorolás, Nyelv). A fejlécben lévő legördülő menüvel megadható, hogy a bejelölt tételeket tartalmazza a találati lista, vagy kizárja azokat.
+                                            </div>
+                                            <a href="sugo.html#sugo-3-2" target="_blank" class="sugo-popover-link">Súgó 3.2 fejezet megnyitása ↗</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="lepes-leiras">
+                                    A találatok letöltése után tetszés szerint adhat meg utólagos szűrőfeltételeket is a bal hasáb alsó részén (Megjelenés éve, Célcsoport, Típus, Besorolás, Nyelv), amelyek azonnal, újratöltés nélkül szűrik a listát.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            } else {
+                return `
+                <div class="alap-utmutato-kontener" id="kezdo-utmutato-osszetett">
+                    <div class="alap-utmutato-fejlec">
+                        <div class="utmutato-ikon">🔬</div>
+                        <div>
+                            <h3>Szisztematikus keresés (SLR / PRISMA mód)</h3>
+                            <p>Építőkockás szakirodalom-kutatás koncepcióbontással és szinonima-hálózatokkal:</p>
+                        </div>
+                    </div>
+                    <div class="alap-utmutato-lepesek">
+                        <!-- 1. Globális kötöttségek -->
+                        <div class="alap-utmutato-lepes">
+                            <div class="lepes-szam">1</div>
+                            <div class="lepes-tartalom">
+                                <div class="lepes-cimsor">
+                                    <span class="lepes-cim">Globális kutatási kötöttségek (Előszűrők)</span>
+                                    <span class="lepes-opcionalis">(bal oldali hasáb · nem kötelező)</span>
+                                    <div class="sugo-gomb-tarolo">
+                                        <button type="button" class="sugo-info-gomb" onclick="toggleSugoPopover(event, 'popover-slr-3-1')" title="Súgó 3.1: Előszűrők" aria-label="Súgó 3.1: Előszűrők">ⓘ</button>
+                                        <div id="popover-slr-3-1" class="sugo-popover">
+                                            <div class="sugo-popover-fejlec">
+                                                <span>📖 Súgó 3.1: Globális előszűrők</span>
+                                                <span class="sugo-popover-zar" onclick="closeSugoPopover('popover-slr-3-1')">&times;</span>
+                                            </div>
+                                            <div class="sugo-popover-szoveg">
+                                                A bal oldali sáv tetején beállított szűrők a szisztematikus mátrix feletti globális szűrősávban jelennek meg interaktív tokenként, és a mátrix minden ágára automatikusan érvényesülnek.
+                                            </div>
+                                            <a href="sugo.html#sugo-3-1" target="_blank" class="sugo-popover-link">Súgó 3.1 fejezet megnyitása ↗</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="lepes-leiras">
+                                    A bal oldali hasábban beállított előszűrők (Szerző, Folyóirat, Intézmény, Évek) globális kötöttségként automatikusan érvényesülnek a lenti mátrix minden kombinációjára.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- 2. Blokkok -->
+                        <div class="alap-utmutato-lepes lepes-kiemelt">
+                            <div class="lepes-szam">2</div>
+                            <div class="lepes-tartalom">
+                                <div class="lepes-cimsor">
+                                    <span class="lepes-cim">Építőkockák és szinonimák felépítése</span>
+                                    <span class="lepes-kotelezo">(fenti blokkok · szükséges)</span>
+                                    <div class="sugo-gomb-tarolo">
+                                        <button type="button" class="sugo-info-gomb" onclick="toggleSugoPopover(event, 'popover-slr-1-2')" title="Súgó 1.2: SLR építőkockák" aria-label="Súgó 1.2: SLR építőkockák">ⓘ</button>
+                                        <div id="popover-slr-1-2" class="sugo-popover">
+                                            <div class="sugo-popover-fejlec">
+                                                <span>📖 Súgó 1.2: Szisztematikus keresés</span>
+                                                <span class="sugo-popover-zar" onclick="closeSugoPopover('popover-slr-1-2')">&times;</span>
+                                            </div>
+                                            <div class="sugo-popover-szoveg">
+                                                Bontsa a kutatási kérdést koncepciókra. A sorokon belül vesszővel elválasztva szinonimák (VAGY kapcsolat), a sorok között feltételek (ÉS kapcsolat) vannak. A 💡 gomb a Saját Tezauruszból hív le szinonimákat.
+                                            </div>
+                                            <a href="sugo.html#sugo-1-2" target="_blank" class="sugo-popover-link">Súgó 1.2 fejezet megnyitása ↗</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="lepes-leiras">
+                                    Adja meg a kutatási kérdés koncepcióit soronként (blokkokban). A sorokon belül szinonimák (VAGY kapcsolat), a sorok között logikai ÉS kapcsolat érvényesül.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- 3. Utólagos szűrés -->
+                        <div class="alap-utmutato-lepes">
+                            <div class="lepes-szam">3</div>
+                            <div class="lepes-tartalom">
+                                <div class="lepes-cimsor">
+                                    <span class="lepes-cim">Utólagos dinamikus finomhangolás</span>
+                                    <span class="lepes-opcionalis">(bal oldali hasáb alsó része · nem kötelező)</span>
+                                    <div class="sugo-gomb-tarolo">
+                                        <button type="button" class="sugo-info-gomb" onclick="toggleSugoPopover(event, 'popover-slr-3-2')" title="Súgó 3.2: Dinamikus utószűkítés" aria-label="Súgó 3.2: Dinamikus utószűkítés">ⓘ</button>
+                                        <div id="popover-slr-3-2" class="sugo-popover">
+                                            <div class="sugo-popover-fejlec">
+                                                <span>📖 Súgó 3.2: Dinamikus utószűkítés</span>
+                                                <span class="sugo-popover-zar" onclick="closeSugoPopover('popover-slr-3-2')">&times;</span>
+                                            </div>
+                                            <div class="sugo-popover-szoveg">
+                                                A már letöltött tételeken belül azonnali memóriabeli szűrést vagy kizárást végezhet típus, nyelv és év alapján.
+                                            </div>
+                                            <a href="sugo.html#sugo-3-2" target="_blank" class="sugo-popover-link">Súgó 3.2 fejezet megnyitása ↗</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="lepes-leiras">
+                                    A találatok letöltése után az alsó szűrőkkel azonnal finomhangolhatja a halmazt (tartalmazás vagy kizárás módban).
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            }
+        }
+
+        function frissitAlapUzenet(mod = keresoMod) {
+            const eredmenyElem = document.getElementById('eredmeny');
+            if (eredmenyElem) {
+                eredmenyElem.innerHTML = getAlapUzenetHTML(mod);
+            }
+        }
+
+        function toggleSugoPopover(event, popoverId) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            const targetPopover = document.getElementById(popoverId);
+            if (!targetPopover) return;
+            const isNyitva = targetPopover.classList.contains('nyitva');
+
+            document.querySelectorAll('.sugo-popover').forEach(p => p.classList.remove('nyitva'));
+            document.querySelectorAll('.sugo-info-gomb').forEach(g => g.classList.remove('aktiv'));
+
+            if (!isNyitva) {
+                targetPopover.classList.add('nyitva');
+                if (event && event.currentTarget) {
+                    event.currentTarget.classList.add('aktiv');
+                }
+            }
+        }
+
+        function closeSugoPopover(popoverId) {
+            const targetPopover = document.getElementById(popoverId);
+            if (targetPopover) targetPopover.classList.remove('nyitva');
+            document.querySelectorAll('.sugo-info-gomb').forEach(g => g.classList.remove('aktiv'));
+        }
+
+        // Globális kattintás és Escape figyelő a Súgó popoverek bezárásához
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.sugo-popover') && !e.target.closest('.sugo-info-gomb')) {
+                document.querySelectorAll('.sugo-popover').forEach(p => p.classList.remove('nyitva'));
+                document.querySelectorAll('.sugo-info-gomb').forEach(g => g.classList.remove('aktiv'));
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.sugo-popover').forEach(p => p.classList.remove('nyitva'));
+                document.querySelectorAll('.sugo-info-gomb').forEach(g => g.classList.remove('aktiv'));
+            }
+        });
 
         // =========================================================================
         // KERESÉS TÖRLÉSE (ÉS A TELJES RENDSZER ALAPHELYZETBE ÁLLÍTÁSA)
@@ -771,7 +1773,6 @@
             if (document.getElementById('osszetett-kizarva')) document.getElementById('osszetett-kizarva').value = '';
 
             // 2. Előszűrők alaphelyzetbe állítása
-            if (document.getElementById('input-eloszuro-allapot')) document.getElementById('input-eloszuro-allapot').value = 'mind';
             if (document.getElementById('input-eloszuro-ev-tol')) document.getElementById('input-eloszuro-ev-tol').value = '';
             if (document.getElementById('input-eloszuro-ev-ig')) document.getElementById('input-eloszuro-ev-ig').value = '';
             if (document.getElementById('input-eloszuro-author')) document.getElementById('input-eloszuro-author').value = '';
@@ -787,12 +1788,18 @@
             aktualisTalalatok = [];
             megjelenoTalalatok = [];
             szerverOsszesTalalat = 0;
+            betoltottOldalakSzama = 1;
+            osszesSzerverOldalSzama = 1;
+            aktivBaseUrls = [];
+            if (ismertMtidSet) ismertMtidSet.clear();
+            letoltesFolyamatban = false;
+            megszakitasKerve = false;
             betoltottSzurok = null;
             ujRekordokDatumTol = null;
             document.getElementById('fajl-feltolto').value = '';
 
             // 4. Fő UI találati lista és szűrők vizuális törlése
-            document.getElementById('eredmeny').innerHTML = "<p class='alap-uzenet'>Kérjük, adja meg a keresési feltételeket a fenti mezőkben...</p>";
+            frissitAlapUzenet(keresoMod);
             document.getElementById('aktiv-szurok-tarolo').style.display = 'none';
             document.getElementById('aktiv-szurok-lista').innerHTML = '';
             uresSzurok();
@@ -821,10 +1828,7 @@
 
         async function szerverKereses() {
             const kijelzo = document.getElementById('eredmeny');
-            kijelzo.innerHTML = "<p class='töltes-uzenet'>Keresés az MTMT adatbázisában... Kérjük, várjon.</p>";
-
             let apiCsomagok = [];
-
             let preFilters = "";
 
             const processPreFilter = (id, field) => {
@@ -860,92 +1864,229 @@
             if (evTol) preFilters += `&cond=publishedYear;ge;${evTol}`;
             if (evIg) preFilters += `&cond=publishedYear;le;${evIg}`;
 
-            let allapotPre = document.getElementById('input-eloszuro-allapot') ? document.getElementById('input-eloszuro-allapot').value : "mind";
-            if (allapotPre === "forras") preFilters += `&cond=core;eq;true`;
-            else if (allapotPre === "idezo") preFilters += `&cond=citation;eq;true`;
+            // Blokkméret és cél letöltési korlát kiolvasása a vezérlőpultból:
+            const blokkSelect = document.getElementById('lapozas-blokk-meret');
+            lapozasiBlokkMeret = blokkSelect ? parseInt(blokkSelect.value, 10) : 100;
+
+            const limitSelect = document.getElementById('lapozas-cel-limit');
+            celLetoltesiLimit = limitSelect ? parseInt(limitSelect.value, 10) : 1000;
+
+            let baseQueryTemplates = [];
 
             if (keresoMod === 'egyszeru') {
                 const beirtSzoveg = document.getElementById('keresoszoveg').value.trim();
                 const okosKereses = okosKeresoFeldolgozo(beirtSzoveg);
-                let url = 'https://m2.mtmt.hu/api/publication/?size=' + LETOLTESI_LIMIT + '&format=json';
 
+                if (okosKereses.tartalmazza.length === 0 && preFilters === "") {
+                    kijelzo.innerHTML = `
+                        <div style="background-color: #fff3cd; color: #856404; padding: 14px 18px; border-radius: 6px; border: 1px solid #ffeeba; margin-bottom: 16px; font-size: 13.5px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
+                            <strong style="font-size: 14.5px;">⚠️ Kérjük, adjon meg legalább egy keresőszót vagy előszűrőt!</strong>
+                            <p style="margin: 6px 0 10px 0; color: #6d5203;">
+                                A keresés elindításához írjon be egy kifejezést a fenti keresősávba (pl. <strong>"élet ellen*" bűncs* -nemi</strong>), vagy válasszon ki egy előszűrőt a bal oldalon!
+                            </p>
+                            <button type="button" onclick="document.getElementById('keresoszoveg').value='&quot;élet ellen*&quot; bűncs* -nemi'; szerverKereses();" class="kicsi-gomb" style="background-color: #ffb612; color: #111; font-weight: bold; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">
+                                💡 Kipróbálás mintával: "élet ellen*" bűncs* -nemi &rarr;
+                            </button>
+                        </div>
+                    ` + getAlapUzenetHTML('egyszeru');
+                    document.getElementById('keresoszoveg').focus();
+                    return;
+                }
+
+                let queryUrl = 'https://m2.mtmt.hu/api/publication/?format=json&label=true';
                 if (okosKereses.tartalmazza.length > 0) {
+                    aktualisRendezes = 'relevancia';
                     okosKereses.tartalmazza.forEach(szo => {
                         let tisztaSzo = szo.replace(/\*/g, '');
-                        url += '&cond=label;any;' + encodeURIComponent(tisztaSzo);
+                        let alSzavak = tisztaSzo.split(/\s+/).filter(Boolean);
+                        if (alSzavak.length > 1) {
+                            alSzavak.forEach(as => {
+                                queryUrl += '&cond=label;any;' + encodeURIComponent(as);
+                            });
+                        } else {
+                            queryUrl += '&cond=label;any;' + encodeURIComponent(tisztaSzo);
+                        }
                     });
                 }
-                apiCsomagok.push(url + preFilters);
+                baseQueryTemplates.push(queryUrl + preFilters);
             }
             else if (keresoMod === 'osszetett') {
                 let blokkok = getOsszetettFeltetelek();
                 if (blokkok.length === 0 && preFilters === "") {
-                    kijelzo.innerHTML = "<p>Kérjük, adjon meg legalább egy keresési feltételt vagy előszűrőt!</p>";
+                    kijelzo.innerHTML = `
+                        <div style="background-color: #fff3cd; color: #856404; padding: 14px 18px; border-radius: 6px; border: 1px solid #ffeeba; margin-bottom: 16px; font-size: 13.5px;">
+                            <strong>⚠️ Kérjük, adjon meg legalább egy keresési feltételt vagy előszűrőt!</strong>
+                        </div>
+                    ` + getAlapUzenetHTML('osszetett');
                     return;
                 }
                 let kombinaciok = generaljKombinaciokat(blokkok);
 
                 if (kombinaciok.length === 0) {
-                    apiCsomagok.push('https://m2.mtmt.hu/api/publication/?size=' + LETOLTESI_LIMIT + '&format=json' + preFilters);
+                    baseQueryTemplates.push('https://m2.mtmt.hu/api/publication/?format=json&label=true' + preFilters);
                 } else {
                     kombinaciok.forEach(kombinacio => {
-                        let url = 'https://m2.mtmt.hu/api/publication/?size=' + LETOLTESI_LIMIT + '&format=json';
+                        let queryUrl = 'https://m2.mtmt.hu/api/publication/?format=json&label=true';
                         kombinacio.forEach(feltetel => {
                             let tisztaSzo = feltetel.szo.replace(/\*/g, '');
                             if (feltetel.mezo === 'author') {
                                 const match = tisztaSzo.match(/\[(\d+)\]/);
                                 const mtid = match ? match[1] : tisztaSzo;
-                                url += '&cond=authorships.author;eq;' + encodeURIComponent(mtid);
+                                queryUrl += '&cond=authorships.author;eq;' + encodeURIComponent(mtid);
                             } else if (feltetel.mezo === 'journal') {
                                 const matchJ = tisztaSzo.match(/\[J:(\d+)\]/);
                                 const matchS = tisztaSzo.match(/\[S:(\d+)\]/);
-                                if (matchJ) {
-                                    url += '&cond=journal;eq;' + encodeURIComponent(matchJ[1]);
-                                } else if (matchS) {
-                                    url += '&cond=series;eq;' + encodeURIComponent(matchS[1]);
-                                } else {
-                                    url += '&cond=journal.label;any;' + encodeURIComponent(tisztaSzo);
-                                }
+                                if (matchJ) queryUrl += '&cond=journal;eq;' + encodeURIComponent(matchJ[1]);
+                                else if (matchS) queryUrl += '&cond=series;eq;' + encodeURIComponent(matchS[1]);
+                                else queryUrl += '&cond=journal.label;any;' + encodeURIComponent(tisztaSzo);
                             } else if (feltetel.mezo === 'institute') {
                                 const matchI = tisztaSzo.match(/\[I:(\d+)\]/);
-                                if (matchI) {
-                                    url += '&cond=institutes;eq;' + encodeURIComponent(matchI[1]);
+                                if (matchI) queryUrl += '&cond=institutes;eq;' + encodeURIComponent(matchI[1]);
+                                else queryUrl += '&cond=institutes.label;any;' + encodeURIComponent(tisztaSzo);
+                            } else if (feltetel.mezo === 'title') {
+                                let alSzavak = tisztaSzo.split(/\s+/).filter(Boolean);
+                                if (alSzavak.length > 1) {
+                                    alSzavak.forEach(as => { queryUrl += '&cond=label;any;' + encodeURIComponent(as); });
                                 } else {
-                                    url += '&cond=institutes.label;any;' + encodeURIComponent(tisztaSzo);
+                                    queryUrl += '&cond=label;any;' + encodeURIComponent(tisztaSzo);
                                 }
                             } else {
-                                url += '&cond=label;any;' + encodeURIComponent(tisztaSzo);
+                                let alSzavak = tisztaSzo.split(/\s+/).filter(Boolean);
+                                if (alSzavak.length > 1) {
+                                    alSzavak.forEach(as => { queryUrl += '&cond=label;any;' + encodeURIComponent(as); });
+                                } else {
+                                    queryUrl += '&cond=label;any;' + encodeURIComponent(tisztaSzo);
+                                }
                             }
                         });
-                        apiCsomagok.push(url + preFilters);
+                        baseQueryTemplates.push(queryUrl + preFilters);
                     });
                 }
             }
 
-            try {
-                let promises = apiCsomagok.map(u => fetch(u).then(r => r.json()));
-                let valaszok = await Promise.all(promises);
+            aktivBaseUrls = baseQueryTemplates;
+            ismertMtidSet = new Set();
+            aktualisTalalatok = [];
+            megjelenoTalalatok = [];
+            szerverOsszesTalalat = 0;
+            betoltottOldalakSzama = 1;
+            osszesSzerverOldalSzama = 1;
+            megszakitasKerve = false;
+            letoltesFolyamatban = true;
 
-                let allItems = [];
-                let allMtid = new Set();
+            // Élő betöltés kijelző
+            kijelzo.innerHTML = `
+                <div class='töltes-uzenet' style="padding: 20px; text-align: center; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;">
+                    <div style="font-size: 16px; font-weight: bold; color: #004481; margin-bottom: 8px;">
+                        ⏳ Keresés az MTMT adatbázisában (1. oldal, ${lapozasiBlokkMeret} rekord)...
+                    </div>
+                    <div style="font-size: 12.5px; color: #64748b; margin-bottom: 12px;">
+                        Az MTMT robotvédelmi szabályainak megfelelően kíméletes blokkokban lapozzuk az adatokat.
+                    </div>
+                    <button type="button" onclick="megszakitasKereses()" class="kicsi-gomb" style="background: #dc3545; color: white; padding: 6px 14px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                        ⏹️ Mégse
+                    </button>
+                </div>
+            `;
+
+            try {
+                // 1. lépés: 1. oldal lekérése biztonságos kötegekben (egyszerre max 3 kérés)
+                let valaszokPage1 = [];
+                for (let i = 0; i < aktivBaseUrls.length; i += 3) {
+                    if (megszakitasKerve) break;
+                    let batch = aktivBaseUrls.slice(i, i + 3);
+                    let batchPromises = batch.map(u => 
+                        fetchMtmt(`${u}&size=${lapozasiBlokkMeret}&page=1`)
+                            .then(r => r.ok ? r.json() : null)
+                            .catch(err => {
+                                console.warn("Lekérdezési hiba a keresési ágon:", u, err);
+                                return null;
+                            })
+                    );
+                    let batchRes = await Promise.all(batchPromises);
+                    valaszokPage1.push(...batchRes);
+                }
+
+                let maxOldal = 1;
                 let becsultOsszes = 0;
 
-                valaszok.forEach(adat => {
+                valaszokPage1.forEach(adat => {
                     if (adat && adat.content) {
-                        becsultOsszes += adat.paging ? adat.paging.totalElements : adat.content.length;
+                        const tElem = adat.paging ? (adat.paging.totalElements ?? adat.content.length) : adat.content.length;
+                        const tPages = adat.paging ? (adat.paging.totalPages ?? 1) : 1;
+                        becsultOsszes += tElem;
+                        if (tPages > maxOldal) maxOldal = tPages;
+
                         adat.content.forEach(pub => {
-                            if (!allMtid.has(pub.mtid)) {
-                                allMtid.add(pub.mtid);
-                                allItems.push(pub);
+                            // Szigorú kizárás: csak idézők (citation === true && core !== true) kizárása
+                            if (isCsakIdezo(pub)) return;
+                            if (!ismertMtidSet.has(pub.mtid)) {
+                                ismertMtidSet.add(pub.mtid);
+                                aktualisTalalatok.push(pub);
                             }
                         });
                     }
                 });
 
-                if (allItems.length > 0) {
-                    aktualisTalalatok = allItems;
-                    szerverOsszesTalalat = keresoMod === 'osszetett' ? becsultOsszes : (valaszok[0].paging ? valaszok[0].paging.totalElements : allItems.length);
+                szerverOsszesTalalat = keresoMod === 'osszetett' ? becsultOsszes : (valaszokPage1[0]?.paging?.totalElements ?? aktualisTalalatok.length);
+                osszesSzerverOldalSzama = maxOldal;
+                betoltottOldalakSzama = 1;
 
+                // 2. lépés: Ha van még oldal, és a felhasználó több rekordot kért a kezdeti letöltési korlátban:
+                const celOldalak = Math.min(osszesSzerverOldalSzama, Math.ceil(celLetoltesiLimit / lapozasiBlokkMeret));
+
+                if (celOldalak > 1 && !megszakitasKerve) {
+                    for (let p = 2; p <= celOldalak; p++) {
+                        if (megszakitasKerve) break;
+
+                        kijelzo.innerHTML = `
+                            <div class='töltes-uzenet' style="padding: 20px; text-align: center; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;">
+                                <div style="font-size: 16px; font-weight: bold; color: #004481; margin-bottom: 8px;">
+                                    📦 További oldalak letöltése lapozással: ${p}. / ${celOldalak} oldal...
+                                </div>
+                                <div style="font-size: 13px; color: #334155; margin-bottom: 12px;">
+                                    Eddig betöltve: <strong>${aktualisTalalatok.length}</strong> / <strong>${szerverOsszesTalalat}</strong> találat
+                                    (${lapozasiBlokkMeret} rekord blokkonként)
+                                </div>
+                                <button type="button" onclick="megszakitasKereses()" class="kicsi-gomb" style="background: #ffb612; color: #111; padding: 6px 14px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                                    ⏹️ Befejezés most (eddigi ${aktualisTalalatok.length} rekord megjelenítése)
+                                </button>
+                            </div>
+                        `;
+
+                        let valaszokP = [];
+                        for (let b = 0; b < aktivBaseUrls.length; b += 3) {
+                            if (megszakitasKerve) break;
+                            let batch = aktivBaseUrls.slice(b, b + 3);
+                            let batchPromises = batch.map(u =>
+                                fetchMtmt(`${u}&size=${lapozasiBlokkMeret}&page=${p}`)
+                                    .then(r => r.ok ? r.json() : null)
+                                    .catch(() => null)
+                            );
+                            let batchRes = await Promise.all(batchPromises);
+                            valaszokP.push(...batchRes);
+                        }
+
+                        valaszokP.forEach(adat => {
+                            if (adat && adat.content) {
+                                adat.content.forEach(pub => {
+                                    // Szigorú kizárás: csak idézők (citation === true && core !== true) kizárása
+                                    if (isCsakIdezo(pub)) return;
+                                    if (!ismertMtidSet.has(pub.mtid)) {
+                                        ismertMtidSet.add(pub.mtid);
+                                        aktualisTalalatok.push(pub);
+                                    }
+                                });
+                            }
+                        });
+
+                        betoltottOldalakSzama = p;
+                    }
+                }
+
+                letoltesFolyamatban = false;
+
+                if (aktualisTalalatok.length > 0) {
                     szurokEpitese(aktualisTalalatok);
 
                     if (betoltottSzurok) {
@@ -958,27 +2099,146 @@
                     aktualisTalalatok = [];
                     megjelenoTalalatok = [];
                     szerverOsszesTalalat = 0;
-                    kijelzo.innerHTML = "<p>Nincs találat.</p>";
+                    const keresoInput = document.getElementById('keresoszoveg');
+                    const beirtSzoveg = keresoInput ? keresoInput.value.trim() : '';
+                    kijelzo.innerHTML = getNincsTalalatHTML(beirtSzoveg);
                     uresSzurok();
                 }
             } catch (hiba) {
-                kijelzo.innerHTML = "<p class='hiba-uzenet'>Hiba történt: " + hiba + "</p>";
+                letoltesFolyamatban = false;
+                kijelzo.innerHTML = `
+                    <div style="background-color: #f8d7da; color: #721c24; padding: 16px; border-radius: 6px; border: 1px solid #f5c6cb; margin: 15px 0;">
+                        <h4 style="margin: 0 0 8px 0;">⚠️ Hiba történt a kapcsolódás során</h4>
+                        <p style="margin: 0 0 10px 0; font-size: 13.5px;">Az MTMT szervere nem válaszolt vagy a hálózati kapcsolat megszakadt: <code>${hiba.message || hiba}</code></p>
+                        <p style="margin: 0; font-size: 12.5px; color: #555;">Tipp: Próbálja 50 rekord/kérés blokkméretre állítani a lapozást a fenti vezérlőn, vagy ellenőrizze a hálózati kapcsolatot.</p>
+                    </div>`;
                 console.error("API Hiba:", hiba);
                 uresSzurok();
             }
         }
 
+        // =========================================================================
+        // LAPOZÁS ÉS TOVÁBBI OLDALAK LETÖLTÉSI MOTORJA
+        // =========================================================================
+        function megszakitasKereses() {
+            megszakitasKerve = true;
+            letoltesFolyamatban = false;
+        }
+
+        async function fetchOldalCsomagok(oldalszam) {
+            let promises = aktivBaseUrls.map(u => 
+                fetchMtmt(`${u}&size=${lapozasiBlokkMeret}&page=${oldalszam}`)
+                    .then(r => r.json())
+                    .catch(err => {
+                        console.warn(`Hiba a(z) ${oldalszam}. oldal lekérésekor:`, err);
+                        return null;
+                    })
+            );
+            let valaszok = await Promise.all(promises);
+            let ujak = [];
+            valaszok.forEach(adat => {
+                if (adat && adat.content) {
+                    adat.content.forEach(pub => {
+                        if (!ismertMtidSet.has(pub.mtid)) {
+                            ismertMtidSet.add(pub.mtid);
+                            ujak.push(pub);
+                        }
+                    });
+                }
+            });
+            return ujak;
+        }
+
+        async function kovetkezoOldalLetoltese() {
+            if (letoltesFolyamatban) return;
+            if (betoltottOldalakSzama >= osszesSzerverOldalSzama) {
+                alert("Minden elérhető oldal már le van töltve!");
+                return;
+            }
+
+            const kovetkezoOldal = betoltottOldalakSzama + 1;
+            letoltesFolyamatban = true;
+            
+            document.querySelectorAll('.gomb-kovetkezo-lap').forEach(b => {
+                b.innerText = '⏳ Betöltés...';
+                b.disabled = true;
+            });
+
+            try {
+                const ujak = await fetchOldalCsomagok(kovetkezoOldal);
+                betoltottOldalakSzama = kovetkezoOldal;
+                if (ujak.length > 0) {
+                    aktualisTalalatok.push(...ujak);
+                    szurokEpitese(aktualisTalalatok);
+                    kliensSzures();
+                } else {
+                    kliensSzures();
+                }
+            } catch (err) {
+                alert("Hiba történt a következő oldal betöltésekor: " + err.message);
+            } finally {
+                letoltesFolyamatban = false;
+            }
+        }
+
+        async function mindenHatralevoOldalLetoltese() {
+            if (letoltesFolyamatban) return;
+            if (betoltottOldalakSzama >= osszesSzerverOldalSzama) {
+                alert("Minden elérhető oldal már le van töltve!");
+                return;
+            }
+
+            const hatralevo = osszesSzerverOldalSzama - betoltottOldalakSzama;
+            if (!confirm(`Szeretné letölteni a hátralévő összes oldalt (${betoltottOldalakSzama + 1} – ${osszesSzerverOldalSzama}. oldal, kb. ${szerverOsszesTalalat - aktualisTalalatok.length} rekord)?`)) {
+                return;
+            }
+
+            letoltesFolyamatban = true;
+            megszakitasKerve = false;
+
+            const modalStatusz = document.createElement('div');
+            modalStatusz.id = 'lapozas-progress-overlay';
+            modalStatusz.style.cssText = 'position:fixed; bottom:20px; right:20px; z-index:9999; background:#004481; color:white; padding:16px 20px; border-radius:8px; box-shadow:0 4px 16px rgba(0,0,0,0.3); font-size:13.5px;';
+            modalStatusz.innerHTML = `
+                <div style="font-weight:bold; margin-bottom:6px;">📦 MTMT Lapozás folyamatban...</div>
+                <div id="lapozas-overlay-szoveg">Oldalak letöltése...</div>
+                <button type="button" onclick="megszakitasKereses()" style="margin-top:10px; background:#ffc107; color:black; border:none; padding:4px 10px; border-radius:4px; font-weight:bold; cursor:pointer;">⏹️ Megállítás</button>
+            `;
+            document.body.appendChild(modalStatusz);
+
+            try {
+                while (betoltottOldalakSzama < osszesSzerverOldalSzama && !megszakitasKerve) {
+                    const kovetkezoOldal = betoltottOldalakSzama + 1;
+                    const txt = document.getElementById('lapozas-overlay-szoveg');
+                    if (txt) txt.innerText = `${kovetkezoOldal}. / ${osszesSzerverOldalSzama}. oldal (${aktualisTalalatok.length} / ${szerverOsszesTalalat} letöltve)...`;
+
+                    const ujak = await fetchOldalCsomagok(kovetkezoOldal);
+                    betoltottOldalakSzama = kovetkezoOldal;
+                    if (ujak.length > 0) {
+                        aktualisTalalatok.push(...ujak);
+                    }
+                }
+            } catch (err) {
+                alert("Hiba történt a többi oldal betöltésekor: " + err.message);
+            } finally {
+                letoltesFolyamatban = false;
+                const overlay = document.getElementById('lapozas-progress-overlay');
+                if (overlay) overlay.remove();
+                szurokEpitese(aktualisTalalatok);
+                kliensSzures();
+            }
+        }
+
         function szurokEpitese(adatok) {
             let evek = new Set();
-            let allapotok = new Set();
             let jellegek = new Map();
             let tipusok = new Map();
             let besorolasok = new Map();
             let nyelvek = new Set();
 
             adatok.forEach(pub => {
+                if (isCsakIdezo(pub)) return;
                 if (pub.publishedYear) evek.add(pub.publishedYear);
-                allapotok.add(getPubAllapot(pub));
 
                 if (pub.category && pub.category.label) {
                     let sorszam = pub.category.listPosition || 999;
@@ -1006,10 +2266,6 @@
                 `<label><input type="checkbox" class="ev-szuro" value="${ev}" onchange="kliensSzures()"> ${ev}</label><br>`
             ).join('');
 
-            document.getElementById('allapot-lista').innerHTML = Array.from(allapotok).sort().map(allapot =>
-                `<label><input type="checkbox" class="allapot-szuro" value="${allapot}" onchange="kliensSzures()"> ${allapot}</label><br>`
-            ).join('');
-
             document.getElementById('nyelv-lista').innerHTML = Array.from(nyelvek).sort().map(nyelv =>
                 `<label><input type="checkbox" class="nyelv-szuro" value="${nyelv}" onchange="kliensSzures()"> ${nyelv}</label><br>`
             ).join('');
@@ -1026,7 +2282,6 @@
                 keresoszoveg: document.getElementById('keresoszoveg').value.trim(),
                 osszetettBlokkok: keresoMod === 'osszetett' ? getOsszetettFeltetelek() : [],
                 osszetettKizarva: document.getElementById('osszetett-kizarva') ? document.getElementById('osszetett-kizarva').value.trim() : "",
-                eloszuroAllapot: document.getElementById('input-eloszuro-allapot') ? document.getElementById('input-eloszuro-allapot').value : "mind",
                 eloszuroEvTol: document.getElementById('input-eloszuro-ev-tol') ? document.getElementById('input-eloszuro-ev-tol').value : "",
                 eloszuroEvIg: document.getElementById('input-eloszuro-ev-ig') ? document.getElementById('input-eloszuro-ev-ig').value : "",
                 eloszuroAuthor: document.getElementById('input-eloszuro-author') ? document.getElementById('input-eloszuro-author').value : "",
@@ -1035,8 +2290,6 @@
                 szurok: {
                     evek: Array.from(document.querySelectorAll('.ev-szuro:checked')).map(cb => cb.value),
                     evMod: document.getElementById('ev-mod').value,
-                    allapotok: Array.from(document.querySelectorAll('.allapot-szuro:checked')).map(cb => cb.value),
-                    allapotMod: document.getElementById('allapot-mod').value,
                     jellegek: Array.from(document.querySelectorAll('.jelleg-szuro:checked')).map(cb => cb.value),
                     jellegMod: document.getElementById('jelleg-mod').value,
                     tipusok: Array.from(document.querySelectorAll('.tipus-szuro:checked')).map(cb => cb.value),
@@ -1069,7 +2322,6 @@
                     let betoltendoMod = adat.keresoMod || 'egyszeru';
                     valtasKeresoMod(betoltendoMod);
 
-                    if (document.getElementById('input-eloszuro-allapot')) document.getElementById('input-eloszuro-allapot').value = adat.eloszuroAllapot || "mind";
                     if (document.getElementById('input-eloszuro-ev-tol')) document.getElementById('input-eloszuro-ev-tol').value = adat.eloszuroEvTol || "";
                     if (document.getElementById('input-eloszuro-ev-ig')) document.getElementById('input-eloszuro-ev-ig').value = adat.eloszuroEvIg || "";
                     if (document.getElementById('input-eloszuro-author')) document.getElementById('input-eloszuro-author').value = adat.eloszuroAuthor || "";
@@ -1135,9 +2387,6 @@
             if (szurok.evMod) document.getElementById('ev-mod').value = szurok.evMod;
             pipaBeallit('ev-szuro', szurok.evek);
 
-            if (szurok.allapotMod) document.getElementById('allapot-mod').value = szurok.allapotMod;
-            pipaBeallit('allapot-szuro', szurok.allapotok);
-
             if (szurok.jellegMod) document.getElementById('jelleg-mod').value = szurok.jellegMod;
             pipaBeallit('jelleg-szuro', szurok.jellegek);
 
@@ -1160,14 +2409,12 @@
 
         function kliensSzures() {
             const evek = Array.from(document.querySelectorAll('.ev-szuro:checked')).map(cb => cb.value);
-            const allapotok = Array.from(document.querySelectorAll('.allapot-szuro:checked')).map(cb => cb.value);
             const jellegek = Array.from(document.querySelectorAll('.jelleg-szuro:checked')).map(cb => cb.value);
             const tipusok = Array.from(document.querySelectorAll('.tipus-szuro:checked')).map(cb => cb.value);
             const besorolasok = Array.from(document.querySelectorAll('.besorolas-szuro:checked')).map(cb => cb.value);
             const nyelvek = Array.from(document.querySelectorAll('.nyelv-szuro:checked')).map(cb => cb.value);
 
             const evMod = document.getElementById('ev-mod').value;
-            const allapotMod = document.getElementById('allapot-mod').value;
             const jellegMod = document.getElementById('jelleg-mod').value;
             const tipusMod = document.getElementById('tipus-mod').value;
             const besorolasMod = document.getElementById('besorolas-mod').value;
@@ -1178,10 +2425,6 @@
             let okosKereses = { tartalmazza: [], kizarja: [] };
             let osszetettBlokkok = [];
             let kizarandoSzavak = [];
-
-            let preAllapot = document.getElementById('input-eloszuro-allapot') ? document.getElementById('input-eloszuro-allapot').value : "mind";
-            if (preAllapot === "forras") aktivFeltetelek.push(`<span class="szuro-cimke" style="background-color:#004481;">📌 Állapot: Csak Forrásközlemény</span>`);
-            if (preAllapot === "idezo") aktivFeltetelek.push(`<span class="szuro-cimke" style="background-color:#004481;">📌 Állapot: Csak Idéző</span>`);
 
             let preAuthor = document.getElementById('input-eloszuro-author') ? document.getElementById('input-eloszuro-author').value.trim() : "";
             if (preAuthor) aktivFeltetelek.push(`<span class="szuro-cimke" style="background-color:#004481;">👤 Szerző: ${preAuthor}</span>`);
@@ -1235,7 +2478,6 @@
             };
 
             cimkeKeszito(evek, evMod, 'Év');
-            cimkeKeszito(allapotok, allapotMod, 'Állapot');
             cimkeKeszito(jellegek, jellegMod, 'Jelleg (célcsoport)');
             cimkeKeszito(tipusok, tipusMod, 'Típus (űrlap)');
             cimkeKeszito(besorolasok, besorolasMod, 'Besorolás (dokumentumtípus)');
@@ -1256,9 +2498,10 @@
             }
 
             const szurtTalalatok = aktualisTalalatok.filter(pub => {
+                // Szigorú kizárás: csak idézők (citation === true && core !== true) kizárása
+                if (isCsakIdezo(pub)) return false;
+
                 let evOk = szuroEllenorzes(pub.publishedYear, evek, evMod);
-                let pubAllapot = getPubAllapot(pub);
-                let allapotOk = szuroEllenorzes(pubAllapot, allapotok, allapotMod);
                 let jellegOk = szuroEllenorzes(pub.category ? pub.category.label : '', jellegek, jellegMod);
                 let tipusOk = szuroEllenorzes(pub.type ? pub.type.label : '', tipusok, tipusMod);
                 let besorolasOk = szuroEllenorzes(pub.subType ? pub.subType.label : '', besorolasok, besorolasMod);
@@ -1268,107 +2511,34 @@
                 let letrejovesIdeje = pub.created ? new Date(pub.created) : new Date(0);
                 let ujdonsagOk = ujRekordokDatumTol !== null ? (letrejovesIdeje >= ujRekordokDatumTol) : true;
 
-                let pubSzoveg = (pub.label || pub.title || "").toLowerCase();
+                // Relevancia motor számítása minden publikációra:
+                const keresoInputElem = document.getElementById('keresoszoveg');
+                const aktKeresoSzoveg = keresoInputElem ? keresoInputElem.value.trim() : '';
+
+                let rel = calcPublicationRelevance(
+                    pub, 
+                    aktKeresoSzoveg, 
+                    okosKereses.tartalmazza, 
+                    okosKereses.kizarja, 
+                    osszetettBlokkok, 
+                    kizarandoSzavak
+                );
+                pub._relevance = rel;
+
+                if (rel.kizart) return false;
+
                 let szovegOk = true;
-
-                if (keresoMod === 'egyszeru') {
-                    for (let szo of okosKereses.tartalmazza) {
-                        if (!pontosKereses(pubSzoveg, szo)) { szovegOk = false; break; }
-                    }
-                    if (szovegOk) {
-                        for (let szo of okosKereses.kizarja) {
-                            if (pontosKereses(pubSzoveg, szo)) { szovegOk = false; break; }
-                        }
-                    }
-                } else if (keresoMod === 'osszetett') {
-                    for (let blokk of osszetettBlokkok) {
-                        let blokkSzerepel = false;
-                        for (let feltetel of blokk) {
-                            if (feltetel.mezo === 'author') {
-                                const match = feltetel.szo.match(/\[(\d+)\]/);
-                                if (match) {
-                                    const searchMtid = parseInt(match[1]);
-                                    if (pub.authorships && pub.authorships.some(a => a.author && a.author.mtid === searchMtid)) {
-                                        blokkSzerepel = true;
-                                        break;
-                                    }
-                                } else {
-                                    let tisztaKeresoSzo = feltetel.szo.replace(/\s*\[\d+\]\s*/g, '').trim().toLowerCase();
-                                    if (pontosKereses(pubSzoveg, tisztaKeresoSzo)) {
-                                        blokkSzerepel = true;
-                                        break;
-                                    }
-                                }
-                            } else if (feltetel.mezo === 'journal') {
-                                const matchJ = feltetel.szo.match(/\[J:(\d+)\]/);
-                                const matchS = feltetel.szo.match(/\[S:(\d+)\]/);
-                                if (matchJ) {
-                                    if (pub.journal && pub.journal.mtid === parseInt(matchJ[1])) {
-                                        blokkSzerepel = true;
-                                        break;
-                                    }
-                                } else if (matchS) {
-                                    if (pub.series && pub.series.mtid === parseInt(matchS[1])) {
-                                        blokkSzerepel = true;
-                                        break;
-                                    }
-                                } else {
-                                    let tisztaKeresoSzo = feltetel.szo.replace(/\s*\[[JS]:\d+\]\s*/g, '').trim().toLowerCase();
-                                    let pubJournalLabel = pub.journal && pub.journal.label ? pub.journal.label.toLowerCase() : "";
-                                    let pubSeriesLabel = pub.series && pub.series.label ? pub.series.label.toLowerCase() : "";
-
-                                    if (pontosKereses(pubJournalLabel, tisztaKeresoSzo) || pontosKereses(pubSeriesLabel, tisztaKeresoSzo)) {
-                                        blokkSzerepel = true;
-                                        break;
-                                    }
-                                }
-                            } else if (feltetel.mezo === 'institute') {
-                                const matchI = feltetel.szo.match(/\[I:(\d+)\]/);
-                                if (matchI) {
-                                    const searchMtid = parseInt(matchI[1]);
-                                    if (pub.institutes && pub.institutes.some(inst => inst.mtid === searchMtid)) {
-                                        blokkSzerepel = true;
-                                        break;
-                                    } else {
-                                        let tisztaKeresoSzo = feltetel.szo.replace(/\s*\[I:\d+\]\s*/g, '').trim().toLowerCase();
-                                        if (pontosKereses(pubSzoveg, tisztaKeresoSzo)) {
-                                            blokkSzerepel = true;
-                                            break;
-                                        }
-                                    }
-                                } else {
-                                    let tisztaKeresoSzo = feltetel.szo.replace(/\s*\[I:\d+\]\s*/g, '').trim().toLowerCase();
-                                    if (pontosKereses(pubSzoveg, tisztaKeresoSzo)) {
-                                        blokkSzerepel = true;
-                                        break;
-                                    }
-                                }
-                            } else {
-                                if (pontosKereses(pubSzoveg, feltetel.szo)) {
-                                    blokkSzerepel = true;
-                                    break;
-                                }
-                            }
-                        }
-                        if (!blokkSzerepel) {
-                            szovegOk = false;
-                            break;
-                        }
-                    }
-                    if (szovegOk) {
-                        for (let kSzo of kizarandoSzavak) {
-                            if (pontosKereses(pubSzoveg, kSzo)) {
-                                szovegOk = false;
-                                break;
-                            }
-                        }
-                    }
+                if (rel.hasQuery) {
+                    szovegOk = rel.score > 0;
                 }
 
-                return evOk && allapotOk && jellegOk && tipusOk && besorolasOk && nyelvOk && ujdonsagOk && szovegOk;
+                return evOk && jellegOk && tipusOk && besorolasOk && nyelvOk && ujdonsagOk && szovegOk;
             });
 
-            talalatokMegjelenitese(szurtTalalatok);
+            // Találatok intelligens rendezése az aktív szempont szerint (alapértelmezetten relevancia!):
+            let rendezettTalalatok = rendezTalalatokat(szurtTalalatok, aktualisRendezes);
+
+            talalatokMegjelenitese(rendezettTalalatok);
         }
 
         function osszesSzuroTorlese() {
@@ -1406,25 +2576,76 @@
             const kijelzo = document.getElementById('eredmeny');
             let kimenetHTML = "";
 
-            if (szerverOsszesTalalat > LETOLTESI_LIMIT) {
-                kimenetHTML += `
-                                            <div style="background-color: #fff3cd; color: #856404; padding: 12px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #ffeeba; font-size: 14px;">
-                                                <strong>⚠️ Figyelem: Részleges találati lista!</strong> 
-                                                A megadott feltételekre több mint <strong>${LETOLTESI_LIMIT}</strong> találat érkezett a szerverről. A megjelenített eredmények és szűrők csak ezen a letöltött halmazon belül érvényesek. Érdemes pontosítani a szavakat!
-                                            </div>`;
-            }
+            const vanMegHatralevoOldal = betoltottOldalakSzama < osszesSzerverOldalSzama && aktualisTalalatok.length < szerverOsszesTalalat;
+            const hatralevoDb = Math.max(0, szerverOsszesTalalat - aktualisTalalatok.length);
+
+            const generalLapozasiSav = (pozicio) => `
+                <div class="lapozas-sav-doboz" style="background: #eef6ff; border: 1px solid #b8daff; border-radius: 6px; padding: 10px 14px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <span style="color: #004481; font-weight: bold; font-size: 13px;">📄 MTMT Lapozási állapot:</span>
+                        <span style="font-size: 12.5px; color: #222; margin-left: 6px;">
+                            Betöltve: <strong>${aktualisTalalatok.length}</strong> / <strong>${szerverOsszesTalalat}</strong> találat 
+                            (<strong>${betoltottOldalakSzama}</strong> / <strong>${osszesSzerverOldalSzama}</strong> oldal · ${lapozasiBlokkMeret} db/blokk)
+                        </span>
+                    </div>
+                    ${vanMegHatralevoOldal ? `
+                        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                            <button type="button" onclick="kovetkezoOldalLetoltese()" class="kicsi-gomb gomb-kovetkezo-lap" style="background: #004481; color: white; border: none; padding: 6px 13px; border-radius: 4px; font-weight: bold; cursor: pointer;" title="Következő oldal (${lapozasiBlokkMeret} rekord) letöltése">
+                                📥 Következő oldal letöltése (+${lapozasiBlokkMeret})
+                            </button>
+                            <button type="button" onclick="mindenHatralevoOldalLetoltese()" class="kicsi-gomb" style="background: #28a745; color: white; border: none; padding: 6px 13px; border-radius: 4px; font-weight: bold; cursor: pointer;" title="Minden további elérhető oldal letöltése a szerverről">
+                                ⚡ Minden további találat letöltése (${hatralevoDb} rekord)
+                            </button>
+                        </div>
+                    ` : `
+                        <div style="font-size: 12px; color: #2e7d32; font-weight: bold; display: flex; align-items: center; gap: 4px;">
+                            <span>✅</span> Mind a ${aktualisTalalatok.length} szerveroldali találat letöltve és szűrhető.
+                        </div>
+                    `}
+                </div>
+            `;
+
+            kimenetHTML += generalLapozasiSav('felso');
 
             kimenetHTML += `
-                                        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid #ddd; padding-bottom: 10px; margin-bottom: 15px;">
-                                            <p style="margin:0;">Jelenleg <strong>${adatok.length}</strong> elem látható a szűrők alapján.</p>
-                                            <div>
-                                                <button onclick="osszesKijelolese()" class="kicsi-gomb" style="margin-right: 5px;">Összes kijelölése</button>
-                                                <button onclick="kijelolesTorlese()" class="kicsi-gomb">Kijelölés törlése</button>
-                                            </div>
-                                        </div>`;
+                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid #ddd; padding-bottom: 12px; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <p style="margin:0; font-size: 13.5px; color: #1e293b;">
+                            Jelenleg <strong>${adatok.length}</strong> elem látható a szűrők alapján (az eddig letöltött ${aktualisTalalatok.length} publikációból).
+                        </p>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 6px; font-size: 13px;">
+                            <label for="valaszto-rendezes" style="font-weight: bold; color: #004481; display: inline-flex; align-items: center; gap: 4px;">
+                                <span>🎯</span> Rendezés:
+                            </label>
+                            <select id="valaszto-rendezes" onchange="valtsRendezest(this.value)" style="padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12.5px; background: white; color: #0f172a; font-weight: 500; cursor: pointer;">
+                                <option value="relevancia" ${aktualisRendezes === 'relevancia' ? 'selected' : ''}>🎯 Relevancia (Legjobb egyezések elöl)</option>
+                                <option value="ev_csokk" ${aktualisRendezes === 'ev_csokk' ? 'selected' : ''}>📅 Évszám (Legújabb elöl)</option>
+                                <option value="ev_nov" ${aktualisRendezes === 'ev_nov' ? 'selected' : ''}>📆 Évszám (Legrégebbi elöl)</option>
+                                <option value="idezett" ${aktualisRendezes === 'idezett' ? 'selected' : ''}>⭐ Idézettség (Összes hivatkozás szerint)</option>
+                                <option value="idezett_fuggetlen" ${aktualisRendezes === 'idezett_fuggetlen' ? 'selected' : ''}>🌟 Idézettség (Független hivatkozások szerint)</option>
+                                <option value="cim_abc" ${aktualisRendezes === 'cim_abc' ? 'selected' : ''}>🔤 Cím (A-Z)</option>
+                                <option value="szerzo_abc" ${aktualisRendezes === 'szerzo_abc' ? 'selected' : ''}>👤 Első szerző (A-Z)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <button onclick="osszesKijelolese()" class="kicsi-gomb" style="margin-right: 5px;">Összes kijelölése</button>
+                            <button onclick="kijelolesTorlese()" class="kicsi-gomb">Kijelölés törlése</button>
+                        </div>
+                    </div>
+                </div>`;
+
+            let aktivKifejezesekKiemeleshez = getAktivKeresoKifejezesek();
 
             adatok.forEach(pub => {
                 let cim = pub.title || "Cím nélküli dokumentum";
+                let kiemeltCim = kiemelKeresoszavakat(cim, aktivKifejezesekKiemeleshez);
+                let alcimHTML = "";
+                if (pub.subTitle) {
+                    let kiemeltAlcim = kiemelKeresoszavakat(pub.subTitle, aktivKifejezesekKiemeleshez);
+                    alcimHTML = `<div style="font-size: 14.5px; font-weight: normal; color: #475569; margin-top: 4px; padding-left: 8px; border-left: 3px solid #004481; font-style: italic;"><strong>Alcím (SubTitle):</strong> ${kiemeltAlcim}</div>`;
+                }
                 let ev = pub.publishedYear || "Évszám hiányzik";
                 let teljesHivatkozas = pub.label || "";
                 let jelleg = pub.category ? pub.category.label : 'Ismeretlen jelleg';
@@ -1432,6 +2653,42 @@
                 let besorolas = pub.subType ? pub.subType.label : 'Ismeretlen besorolás';
 
                 let allapot = getPubAllapot(pub);
+
+                let rel = pub._relevance;
+                let relHTML = "";
+                if (rel && rel.hasQuery && rel.score !== undefined) {
+                    let badgeColor = "#15803d";
+                    let bgBadge = "#dcfce7";
+                    let borderBadge = "#86efac";
+                    let ikon = "🎯";
+                    if (rel.score < 45) {
+                        badgeColor = "#475569";
+                        bgBadge = "#f1f5f9";
+                        borderBadge = "#cbd5e1";
+                        ikon = "📄";
+                    } else if (rel.score < 70) {
+                        badgeColor = "#b45309";
+                        bgBadge = "#fef3c7";
+                        borderBadge = "#fde68a";
+                        ikon = "🔍";
+                    } else if (rel.score < 85) {
+                        badgeColor = "#0369a1";
+                        bgBadge = "#e0f2fe";
+                        borderBadge = "#7dd3fc";
+                        ikon = "✨";
+                    }
+
+                    relHTML = `
+                        <div style="margin-bottom: 6px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                            <span style="background: ${bgBadge}; color: ${badgeColor}; border: 1px solid ${borderBadge}; padding: 2px 8px; border-radius: 12px; font-size: 11.5px; font-weight: bold; display: inline-flex; align-items: center; gap: 4px;">
+                                <span>${ikon}</span> Relevancia: ${rel.percent}%
+                            </span>
+                            <span style="font-size: 12px; color: #64748b; font-style: italic;">
+                                ${rel.reason}
+                            </span>
+                        </div>
+                    `;
+                }
 
                 let folyoiratNev = "Nem megadott / Nem folyóiratcikk";
                 let issnSzoveg = "";
@@ -1471,6 +2728,59 @@
 
                 let letrehozvaSzoveg = pub.created ? new Date(pub.created).toLocaleDateString('hu-HU') : "Ismeretlen";
 
+                let osszesIdézet = (pub.citationCount !== undefined && pub.citationCount !== null)
+                    ? pub.citationCount
+                    : ((pub.citations && pub.citations.total) || 0);
+
+                let fuggetlenIdézet = (pub.independentCitationCount !== undefined && pub.independentCitationCount !== null)
+                    ? pub.independentCitationCount
+                    : (pub.citations ? pub.citations.independent : undefined);
+
+                let onidezet = pub.selfCitationCount;
+                let wosIdézet = pub.wosCitationCount ?? (pub.citations ? pub.citations.wos : undefined);
+                let scopusIdézet = pub.scopusCitationCount ?? (pub.citations ? pub.citations.scopus : undefined);
+
+                let isIdézettRendezes = (aktualisRendezes === 'idezett' || aktualisRendezes === 'idezett_fuggetlen');
+
+                let idezettBadgeHTML = "";
+                if (osszesIdézet > 0) {
+                    let fuggetlenResz = (fuggetlenIdézet !== undefined && fuggetlenIdézet !== null)
+                        ? ` <span style="font-weight: normal; opacity: 0.9;">(${fuggetlenIdézet} független)</span>`
+                        : "";
+                    let badgeBg = isIdézettRendezes ? "#fffbeb" : "#f0fdf4";
+                    let badgeBorder = isIdézettRendezes ? "#f59e0b" : "#86efac";
+                    let badgeColor = isIdézettRendezes ? "#b45309" : "#166534";
+                    let badgeIcon = (aktualisRendezes === 'idezett_fuggetlen') ? "🌟" : "⭐";
+
+                    idezettBadgeHTML = `
+                        <span style="background: ${badgeBg}; border: 1px solid ${badgeBorder}; color: ${badgeColor}; padding: 3px 9px; border-radius: 12px; font-size: 11.5px; font-weight: bold; display: inline-flex; align-items: center; gap: 4px;" title="MTMT hivatkozások: ${osszesIdézet} összesen${fuggetlenIdézet !== undefined ? ', ' + fuggetlenIdézet + ' független' : ''}">
+                            <span>${badgeIcon}</span> Idézettség: <strong>${osszesIdézet}</strong>${fuggetlenResz}
+                        </span>
+                    `;
+                } else {
+                    idezettBadgeHTML = `
+                        <span style="background: #f8fafc; border: 1px solid #e2e8f0; color: #94a3b8; padding: 2.5px 8px; border-radius: 12px; font-size: 11px; display: inline-flex; align-items: center; gap: 3px;" title="Nincs regisztrált idéző közlemény az MTMT-ben">
+                            <span>📊</span> Idézettség: 0
+                        </span>
+                    `;
+                }
+
+                let reszletesMetrikak = [];
+                reszletesMetrikak.push(`Összes hivatkozás: <strong>${osszesIdézet}</strong>`);
+                if (fuggetlenIdézet !== undefined && fuggetlenIdézet !== null) {
+                    reszletesMetrikak.push(`Független hivatkozások: <strong>${fuggetlenIdézet}</strong>`);
+                }
+                if (onidezet !== undefined && onidezet !== null) {
+                    reszletesMetrikak.push(`Önidézések: <strong>${onidezet}</strong>`);
+                }
+                if (wosIdézet !== undefined && wosIdézet !== null && wosIdézet > 0) {
+                    reszletesMetrikak.push(`Web of Science (WoS): <strong>${wosIdézet}</strong>`);
+                }
+                if (scopusIdézet !== undefined && scopusIdézet !== null && scopusIdézet > 0) {
+                    reszletesMetrikak.push(`Scopus: <strong>${scopusIdézet}</strong>`);
+                }
+                let idezettReszletekHTML = reszletesMetrikak.join(' &nbsp;|&nbsp; ');
+
                 kimenetHTML += `
                     <div class="publikacio-kartya" style="border: 1px solid #eee; padding: 15px; margin-bottom: 15px; border-radius: 5px; background: #fff;">
                         <div style="display: flex; gap: 15px; align-items: flex-start;">
@@ -1479,18 +2789,27 @@
                             
                             <div style="flex-grow: 1;">
                                 ${pub.isOpenAlex ? `<div style="margin-bottom: 8px;"><span style="background-color: #e83e8c; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase;">🌐 Forrás: OpenAlex</span></div>` : ''}
-                                
-                                <h3 style="margin-top: 0; color: #004481; font-size: 18px; margin-bottom: 5px;">${cim} <span style="color:#d9534f;">(${ev})</span></h3>
+                                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 4px;">
+                                    <div>${relHTML}</div>
+                                    <div>${idezettBadgeHTML}</div>
+                                </div>
+                                <h3 style="margin-top: 0; color: #004481; font-size: 18px; margin-bottom: 5px; line-height: 1.35;">
+                                    ${kiemeltCim} <span style="color:#d9534f; font-size: 15px; font-weight: normal;">(${ev})</span>
+                                    ${alcimHTML}
+                                </h3>
                                 <p style="font-size: 14px; color: #555; margin-top: 0; margin-bottom: 8px;">${teljesHivatkozas}</p>
                                 
                                 ${(doi !== "Nincs DOI" || oaLinkStr !== "") ? `<div style="font-size: 13px; margin-bottom: 10px; background-color: #f0f7ff; display: inline-block; padding: 4px 8px; border-radius: 4px; border: 1px solid #cce5ff;">🔗 <strong>DOI:</strong> ${doi}${oaLinkStr}</div>` : ''}
 
-                                <div style="margin-top: 10px; font-size: 12px; color: #999; display: flex; justify-content: space-between; align-items: center;">
+                                <div style="margin-top: 10px; font-size: 12px; color: #64748b; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
                                     <span>Jelleg (célcsoport): <strong>${jelleg}</strong> | Állapot: <strong style="color:#17a2b8;">${allapot}</strong> | MTMT ID: ${pub.isOpenAlex ? 'N/A' : pub.mtid}</span>
                                     <button id="gomb-${pub.mtid}" onclick="reszletekMutatasa('${pub.mtid}')" style="background:none; border:none; color:#004481; cursor:pointer; font-weight:bold; font-size:12px;">Részletek mutatása ▼</button>
                                 </div>
                                 
                                 <div id="reszletek-${pub.mtid}" style="display: none; margin-top: 15px; padding: 10px; background-color: #f9f9fa; border-left: 3px solid #004481; font-size: 13px;">
+                                    <p style="margin: 0 0 5px 0;"><strong>⭐ Idézettségi adatok:</strong> ${idezettReszletekHTML}</p>
+                                    <p style="margin: 0 0 5px 0;"><strong>Főcím:</strong> ${pub.title || '-'}</p>
+                                    ${pub.subTitle ? `<p style="margin: 0 0 5px 0;"><strong>Alcím (subTitle):</strong> ${pub.subTitle}</p>` : ''}
                                     <p style="margin: 0 0 5px 0;"><strong>Típus (űrlap) / Besorolás (dokumentumtípus):</strong> ${tipus} / ${besorolas}</p>
                                     <p style="margin: 0 0 5px 0;"><strong>Szerző(k):</strong> ${szerzoSzoveg}</p>
                                     <p style="margin: 0 0 5px 0;"><strong>Megjelenés helye:</strong> ${folyoiratNev}${issnSzoveg}</p>
@@ -1506,6 +2825,37 @@
                     </div>
                 `;
             });
+
+            if (adatok.length === 0) {
+                const keresoInput = document.getElementById('keresoszoveg');
+                const beirtSzoveg = keresoInput ? keresoInput.value.trim() : '';
+                let javaslat = javasolHelyesirast(beirtSzoveg);
+                let javaslatHTML = "";
+                if (javaslat) {
+                    javaslatHTML = `
+                        <div style="background-color: #f0fdf4; border: 1px solid #86efac; border-radius: 6px; padding: 12px 16px; margin: 12px 0; text-align: left;">
+                            <strong>💡 Elírás a keresőszóban?</strong> Lehetséges, hogy a(z) <strong>"${beirtSzoveg}"</strong> helyett erre gondolt: <button type="button" onclick="futtassJavithatottKeresest('${javaslat}')" class="kicsi-gomb" style="background-color: #004481; color: white; border: none; padding: 5px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; margin-left: 8px;">"${javaslat}" keresése &rarr;</button>
+                        </div>
+                    `;
+                }
+                kimenetHTML += `
+                    <div style="background-color: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 24px; text-align: center; margin: 15px 0;">
+                        <div style="font-size: 32px; margin-bottom: 8px;">🔍</div>
+                        <h4 style="margin: 0 0 8px 0; color: #1e293b; font-size: 15px;">A letöltött ${aktualisTalalatok.length} publikáció közül a kiválasztott szűrők alapján egy sem jeleníthető meg.</h4>
+                        <p style="margin: 0 0 12px 0; font-size: 13px; color: #64748b;">
+                            Próbálja meg feloldani az aktív utószűrőket vagy ellenőrizze a keresési kifejezést!
+                        </p>
+                        ${javaslatHTML}
+                        <button type="button" onclick="osszesSzuroTorlese()" class="kicsi-gomb" style="background-color: #004481; color: white; border: none; padding: 7px 16px; border-radius: 4px; font-weight: bold; cursor: pointer;">
+                            🔄 Összes szűrő törlése
+                        </button>
+                    </div>
+                `;
+            }
+
+            if (adatok.length > 5) {
+                kimenetHTML += generalLapozasiSav('also');
+            }
 
             kijelzo.innerHTML = kimenetHTML;
         }
@@ -1873,6 +3223,7 @@
                 subType: { label: 'OpenAlex import' },
                 core: true, // Forrásközleményként kezeljük, hogy a CSL és export motorok feldolgozzák
                 citation: false,
+                citationCount: relWork.cited_by_count || 0,
                 journal: {
                     title: folyoiratNev,
                     label: folyoiratNev
@@ -2282,19 +3633,6 @@
                 });
             }
 
-            // 5. Közlemény szerepe
-            const allapotElem = document.getElementById('input-eloszuro-allapot');
-            if (allapotElem && allapotElem.value !== 'mind') {
-                const szoveg = allapotElem.value === 'forras' ? 'Forrásközlemény' : 'Idéző közlemény';
-                tokenek.push({
-                    tipus: 'allapot',
-                    cimke: 'Szerep',
-                    ikon: '📑',
-                    ertek: szoveg,
-                    osztaly: 'token-szerep'
-                });
-            }
-
             // Kiszámítjuk a tokeneket mindkét felülethez (Normál keresősáv és PRISMA SLR sáv)
             const slrTarolo = document.getElementById('slr-tokenek-tarolo');
             const slrNincsUzenet = document.getElementById('slr-nincs-szuro-uzenet');
@@ -2367,7 +3705,7 @@
                 if (infoSav) infoSav.style.display = 'none';
                 const inputKereso = document.getElementById('keresoszoveg');
                 if (inputKereso) {
-                    inputKereso.placeholder = 'Pl.: stress brain* "systematic review" -post*';
+                    inputKereso.placeholder = 'Pl.: "élet ellen*" bűncs* -nemi';
                 }
                 if (slrNincsUzenet) slrNincsUzenet.style.display = 'block';
             }
@@ -2388,9 +3726,6 @@
                 const el2 = document.getElementById('input-eloszuro-ev-ig');
                 if (el1) el1.value = '';
                 if (el2) el2.value = '';
-            } else if (tipus === 'allapot') {
-                const el = document.getElementById('input-eloszuro-allapot');
-                if (el) el.value = 'mind';
             }
             frissitBeemeltEloszurok();
         }
@@ -2413,11 +3748,6 @@
                 }
             });
 
-            const allapotElem = document.getElementById('input-eloszuro-allapot');
-            if (allapotElem) {
-                allapotElem.addEventListener('change', frissitBeemeltEloszurok);
-            }
-
             const keresoElem = document.getElementById('keresoszoveg');
             if (keresoElem) {
                 keresoElem.addEventListener('keydown', function (e) {
@@ -2425,10 +3755,23 @@
                         szerverKereses();
                     }
                 });
+                keresoElem.addEventListener('input', function () {
+                    const javaslat = javasolHelyesirast(this.value);
+                    const javaslatDiv = document.getElementById('kereses-helyesiras-javaslat');
+                    if (javaslatDiv) {
+                        if (javaslat) {
+                            javaslatDiv.innerHTML = `💡 <strong>Elírás észlelve?</strong> Erre a szakszóra gondolt: <button type="button" onclick="futtassJavithatottKeresest('${javaslat}')" style="background: none; border: none; color: #004481; font-weight: bold; text-decoration: underline; cursor: pointer; padding: 0 4px; font-size: 13px;">${javaslat}</button>? (Kattintson a javított kereséshez)`;
+                            javaslatDiv.style.display = 'block';
+                        } else {
+                            javaslatDiv.style.display = 'none';
+                        }
+                    }
+                });
             }
 
             // Kezdeti állapot frissítése
             frissitBeemeltEloszurok();
+            frissitAlapUzenet(keresoMod);
         });
     </script>
 </body>

@@ -152,7 +152,7 @@
 
       <h2>1. Keresési Módok</h2>
 
-      <h3>1.1. Egyszerű keresés</h3>
+      <h3 id="sugo-1-1">1.1. Egyszerű keresés</h3>
       <p>A leggyorsabb módja a szakirodalom feltérképezésének. A megadott szavakat a rendszer minden metaadatban (cím,
         absztrakt, szerző, folyóirat) keresi.</p>
       <ul>
@@ -169,10 +169,19 @@
           <code>oktatás -közoktatás</code>.</li>
       </ul>
 
-      <h3>1.2. Szisztematikus (SLR) keresés</h3>
+      <div class="pelda-doboz">
+        <strong>💡 Gyakorlati minta összetett operátor-használatra az egyszerű keresésben:</strong><br>
+        <code style="font-size: 14px; font-weight: bold; color: #004481;">"élet ellen*" bűncs* -nemi</code><br>
+        <p style="margin: 6px 0 0 0; font-size: 12.5px; color: #475569; line-height: 1.5;">
+          Ez a keresőkifejezés megtalálja az élet elleni bűncselekmények szakirodalmát (az <em>"élet ellen*"</em> pontos kifejezés és a <em>bűncs*</em> csonkolt tő segítségével), miközben a <em>-nemi</em> kizáró operátorral kiszűri a nemi élet/erkölcs elleni publikációkat.
+        </p>
+      </div>
+
+      <h3 id="sugo-1-2">1.2. Szisztematikus (SLR) keresés</h3>
       <p>A PRISMA protokoll szerinti irodalomkutatást (Systematic Literature Review) támogató építőkockás felület. Itt
         tudja a kutatási kérdését koncepciókra (blokkokra) bontani.</p>
       <ul>
+        <li><strong>Globális Kutatási Kötöttségek (Előszűrők):</strong> A bal oldali oszlopban beállított szempontok (Szerző, Folyóirat, Intézmény, Évek) közvetlenül a blokkok felett egy kiemelt globális szűrősávban jelennek meg interaktív tokenként. Ezek automatikusan, logikai <strong>ÉS</strong> kapcsolattal érvényesülnek a lenti mátrix minden egyes kombinációjára, és az <code>✕</code> jellel közvetlenül törölhetők.</li>
         <li><strong>Blokkok (Sorok):</strong> Egy soron belül a szavakat vesszővel válassza el. Ezek között <strong>VAGY
             (OR)</strong> kapcsolat lesz. Ide a szinonimákat írja.</li>
         <li><strong>Kapcsolat a blokkok között:</strong> A sorok között szigorú <strong>ÉS (AND)</strong> kapcsolat
@@ -223,10 +232,10 @@
 
       <h2>3. Szűrési Rendszer (Előszűrők és Utószűrők)</h2>
 
-      <h3>3.1. Előszűrők (Keresés szűkítése letöltés előtt)</h3>
+      <h3 id="sugo-3-1">3.1. Előszűrők (Keresés szűkítése letöltés előtt)</h3>
       <p>A bal oldali sáv tetején lévő előszűrők (Kiadás éve, Szerző, Folyóirat, Intézmény) a legfontosabbak, mert ezek
-        <strong>még azelőtt elküldik a korlátozást a szervernek, mielőtt a maximum 2000 találat letöltődne</strong>.
-        Ezzel elkerülhető, hogy a releváns cikkek "kiszoruljanak" a limitből.</p>
+        <strong>még azelőtt elküldik a korlátozást a szervernek, mielőtt a találatok letöltődnének</strong>.
+        Ezzel optimalizálható a lekérés, és azonnal a legfontosabb cikkek tölthetők le.</p>
       <div class="tipp">
         <strong>Intelligens MTMT Kereső (🔍):</strong> Ha a Szerző, Folyóirat vagy Intézmény mező melletti nagyítóra
         kattint, egy külön ablakban kereshet az MTMT adatbázisában. A rendszer a találatokat <strong>relevancia
@@ -234,9 +243,12 @@
         entitás azonosítója (MTID) bekerül a mezőbe, garantálva a tűpontos szűrést.
       </div>
 
-      <h3>3.2. Dinamikus szűkítés (Utólagos szűrés)</h3>
-      <p>A bal oldali sáv alsó felén lévő dobozok a már letöltött 2000 találaton belül végeznek azonnali, memóriában
-        futó szűrést (Év, Állapot, Nyelv, stb.). Bármelyiket bepipálja, a lista újratöltés nélkül frissül.</p>
+      <h3 id="sugo-3-2">3.2. Dinamikus szűkítés és Intelligens Lapozás (Robotvédelem)</h3>
+      <p>Az MTMT v2 szervere robotvédelmi okokból kérésenként legfeljebb 50 vagy 100 rekordot ad át. Az alkalmazás
+        ehhez igazodva kíméletes, szabályos blokkokban lapozva tölti le az adatokat. A keresősáv feletti vezérlőpulton beállítható
+        a blokkméret (50 vagy 100) és a kezdeti letöltési korlát (pl. 100, 300, 500, 1000 vagy Összes).</p>
+      <p>A bal oldali sáv alsó felén lévő dobozok a már letöltött találati halmazon belül végeznek azonnali, memóriában
+        futó szűrést (Év, Célcsoport, Típus, Besorolás, Nyelv). A rendszer a tudományos relevancia és megbízhatóság érdekében <strong>szigorúan kizárja a pusztán idéző</strong> (nem hitelesített magyar forrásból származó) közleményeket, miközben a befoglaló kiadványok és a kettős szerepű közlemények hiánytalanul elérhetők maradnak.</p>
       <ul>
         <li>Minden doboz tetején egy legördülő menüvel megadhatja, hogy a kipipált elemeket <strong>tartalmazza</strong>
           a lista, vagy pont fordítva: <strong>zárja ki</strong> azokat.</li>
